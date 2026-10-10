@@ -37,6 +37,7 @@ jobs:
           PRODUCT_NAME: Vortex support for the cabin game
           PRODUCT_SUMMARY: Vortex extension for the cabin game.
           PRODUCT_SUPPORT: https://support.doodesch.de/vortex
+          PRODUCT_THUMBNAIL: https://raw.githubusercontent.com/DooDesch-Mods/TheCabinGame-Vortex/main/extension/gameart.png
         run: python tools/announce-release.py
       - name: Keep Discord acknowledgement
         if: always()
