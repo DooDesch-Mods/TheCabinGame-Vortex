@@ -40,7 +40,7 @@ jobs:
           "asset=$packageBase.zip" >> $env:GITHUB_OUTPUT
           "receipt=$packageBase.json" >> $env:GITHUB_OUTPUT
       - name: Verify gameplay package builder and document links
-        run: python tools/verify-preparation.py
+        run: python tools/verify-tooling.py
       - name: Verify publication guards without an upload
         run: python tests/test_release.py
       - uses: actions/upload-artifact@v7.0.2

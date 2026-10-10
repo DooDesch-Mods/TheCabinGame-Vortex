@@ -1,47 +1,59 @@
-# the cabin game — Vortex support 0.1.0
+# the cabin game - Vortex Support
 
-Community extension by DooDesch. Steam Windows version, app 4406280.
+> 🛟 **Need help or found a bug?** Get support at [support.doodesch.de/thecabingame-vortex](https://support.doodesch.de/thecabingame-vortex).
 
-Install this archive through Vortex's Extensions page (drop the ZIP onto the
-installation area), then restart Vortex. Find **the cabin game** in Games and
-select Manage. If discovery does not find it, select the folder containing
-`the_cabin_game.exe`, usually `steamapps/common/the cabin game`.
+Community extension by DooDesch for Steam on Windows, app ID `4406280`.
+This package is a test candidate. Live Vortex/game validation is pending.
 
-Supported archives:
+## Install
 
-- Loose or wrapped `.pak` files go into `the_cabin_game/Content/Paks/~mods`.
-- `.utoc` and `.ucas` files must ship together with matching names. Their names
-  are preserved. Include the `.pak` companion when the mod's build produces one.
-- Game-root archives preserve `the_cabin_game/Content/Paks/...` paths, including
-  `LogicMods`, and `the_cabin_game/Binaries/Win64/ue4ss/...` paths.
-- `Mods/<ModName>/...` archives go into
-  `the_cabin_game/Binaries/Win64/ue4ss/Mods/<ModName>/...`.
-- A separately supplied modern UE4SS runtime archive containing `dwmapi.dll`
-  and `ue4ss/UE4SS.dll` can be installed through the same route. The runtime is
-  not included or downloaded automatically by this extension.
+1. Open **Extensions** in Vortex and drop this extension ZIP into the installation area.
+2. Restart Vortex.
+3. Find **the cabin game** under **Games** and select **Manage**.
+4. Install a compatible gameplay mod and select **Deploy**.
 
-Independent Lua/native mods must include `enabled.txt` in their mod folder.
-The supplied packaging tool can add this marker. The extension rejects a
-standalone mod that replaces shared `mods.txt`/`mods.json`. Mods requiring a
-specific loader order need an explicit authored solution before distribution.
+For manual discovery, select the folder containing both files:
 
-Disable a mod and Deploy to remove its deployed files. Purge removes managed
-files from the game; Remove deletes the staged mod. User saves are not an
-installation target. Files created by the game/loader while running, such as
-logs and mod state, remain outside Vortex's deployment manifest.
+```text
+the_cabin_game.exe
+the_cabin_game/Binaries/Win64/the_cabin_game-Win64-Shipping.exe
+```
 
-This preparation build uses a local game ID. Nexus download links require the
-real Nexus game domain to be configured after the game entry is created. The
-code and isolated filesystem deployment have been checked; testing in Vortex
-and in the running game remains pending. No reconnect functionality is supplied
-by this extension. The gameplay mod is developed separately.
+Lua/native mods require a game-compatible UE4SS runtime. Follow the gameplay
+mod's version requirement. The extension does not include or download UE4SS.
 
-Copyright (c) 2026 DooDesch. Code, documentation and original artwork are
-licensed under GPL-3.0-only. You may modify and redistribute them under the
-GPL terms, including commercially, with the required notices and corresponding
-source. `gameart.png` is original illustrative artwork,
-not an official game screenshot or logo. See LICENSE.md and CREDITS.md.
+## Supported archives
+
+- Loose or wrapped `.pak` files install into `the_cabin_game/Content/Paks/~mods`.
+- `.utoc` and `.ucas` files must have matching names and ship together. Include the `.pak` companion when the mod build produces one.
+- Game-root archives preserve `the_cabin_game/Content/Paks/...`, including `LogicMods`, and `the_cabin_game/Binaries/Win64/ue4ss/...`.
+- `Mods/<ModName>/...` installs into `the_cabin_game/Binaries/Win64/ue4ss/Mods/<ModName>`.
+- Separately supplied UE4SS bundles containing `dwmapi.dll` and `ue4ss/UE4SS.dll` retain their runtime layout.
+
+Independent Lua/native mods need `enabled.txt` inside their mod folder.
+Standalone mods that replace shared `mods.txt` or `mods.json` are rejected.
+Mods requiring a specific loader order need a separately validated solution.
+Use explicit game-root paths for `LogicMods`; PAK mount points are not inspected.
+
+## Removal
+
+Close the game. Disable a mod and select **Deploy** to remove its deployed files.
+**Purge** removes files managed by Vortex. **Remove** deletes the staged mod.
+Saves, logs and mod state generated during play remain outside Vortex's manifest.
+Use the gameplay mod's uninstall guide for those files.
+
+## Test limitations
+
+Local-ID candidates cannot route the game's Nexus downloads. Final packages need
+the approved Nexus game domain. Installer and isolated filesystem checks do not
+establish game discovery, launch, PAK mounting or UE4SS activation in a live game.
+
+## License and source
+
+Copyright (c) 2026 DooDesch. Code, documentation and original artwork use
+GPL-3.0-only. See LICENSE.md and CREDITS.md. The cabin illustration is not an
+official game screenshot or logo.
 
 Complete source, build tools and editable artwork:
 [DooDesch-Mods/TheCabinGame-Vortex](https://github.com/DooDesch-Mods/TheCabinGame-Vortex).
-For a published release, use the source tag/commit linked on its download page.
+For a published release, use the source tag or commit linked on its download page.

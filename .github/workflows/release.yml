@@ -42,7 +42,7 @@ jobs:
       - run: python -m pip install -r requirements.txt
       - name: Verify package tooling, documentation and publication guards
         run: |
-          python tools/verify-preparation.py
+          python tools/verify-tooling.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tests/test_release.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -70,7 +70,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Upload new file version to Nexus
         if: steps.release.outputs.nexus_ready == 'true'
-        # Nexus-Mods/upload-action v1.0.0-beta.10, pinned to the verified commit.
+        # Nexus-Mods/upload-action v1.0.0-beta.10, pinned to a commit.
         uses: Nexus-Mods/upload-action@c96019556046053aa26044b44396cd38929daf23
         id: nexus
         with:

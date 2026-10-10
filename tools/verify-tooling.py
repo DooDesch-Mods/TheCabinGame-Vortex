@@ -1,4 +1,4 @@
-"""Check the new release-payload packager and the prepared artifact links."""
+"""Check gameplay packaging and public documentation links."""
 import json
 from pathlib import Path
 import re
@@ -14,7 +14,7 @@ def main():
     script.parent.mkdir(parents=True, exist_ok=True)
     script.write_text('-- TEST FIXTURE ONLY: not a gameplay mod\n', encoding='utf-8')
     (payload / 'Fixture_P.pak').write_bytes(b'TEST FIXTURE ONLY: not a valid game container')
-    (payload / 'README.md').write_text('TEST ONLY — do not install or upload.\n', encoding='utf-8')
+    (payload / 'README.md').write_text('TEST ONLY - do not install or upload.\n', encoding='utf-8')
     result = subprocess.run(['python', '-X', 'utf8', str(ROOT / 'tools' / 'package-game-mod.py'),
                              str(payload), '--name', 'TESTONLY', '--version', '0.0.0'],
                             capture_output=True, text=True, encoding='utf-8')
@@ -34,7 +34,7 @@ def main():
     target.with_suffix('.json').replace(evidence / target.with_suffix('.json').name)
     broken = []
     documents = list(ROOT.glob('*.md'))
-    for folder in ['extension', 'submission', 'publishing']:
+    for folder in ['extension', 'docs']:
         documents.extend((ROOT / folder).glob('*.md'))
     for file in documents:
         for link in re.findall(r'\]\(([^)]+)\)', file.read_text(encoding='utf-8')):
@@ -42,17 +42,14 @@ def main():
                 broken.append({'file': str(file.relative_to(ROOT)), 'link': link})
     if broken:
         raise ValueError(f'broken local artifact links: {broken}')
-    summary = (ROOT / 'submission' / 'vortex-summary.txt').read_text(encoding='utf-8').strip()
-    if len(summary) > 250:
-        raise ValueError(f'Nexus summary is too long: {len(summary)}/250')
     report = {'status': 'confirmed', 'markerAddedAndArchived': True, 'fixtureFiles': names,
-              'localLinks': 'all checked', 'nexusSummaryCharacters': len(summary),
-              'scope': 'package builder and prepared artifact links; not live Vortex/game acceptance'}
-    (evidence / 'preparation-check.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
+              'localLinks': 'all checked',
+              'scope': 'package builder and public documentation links; not live Vortex/game acceptance'}
+    (evidence / 'tooling-check.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     print(json.dumps(report, indent=2))
 
 if __name__ == '__main__':
     try:
         main()
     except Exception as error:
-        raise SystemExit(f'error: verify preparation: {error}') from error
+        raise SystemExit(f'error: verify tooling: {error}') from error

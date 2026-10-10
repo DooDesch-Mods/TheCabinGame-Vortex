@@ -1,100 +1,110 @@
-# the cabin game — Vortex Support
+# the cabin game - Vortex Support
 
-Community Vortex extension for the Steam Windows version of **the cabin game**
-(app ID `4406280`), maintained by DooDesch.
+> 🛟 **Need help or found a bug?** Get support at [support.doodesch.de/thecabingame-vortex](https://support.doodesch.de/thecabingame-vortex).
 
-Discover the game, install PAK/IoStore and UE4SS mod archives, and manage their
-files through Vortex deployment, disable and purge.
+[![Check and build](https://github.com/DooDesch-Mods/TheCabinGame-Vortex/actions/workflows/ci.yml/badge.svg)](https://github.com/DooDesch-Mods/TheCabinGame-Vortex/actions/workflows/ci.yml)
 
-## Release status
+Community game support for the Steam Windows version of **the cabin game**.
+Discover the game and manage PAK, IoStore and UE4SS mod files through Vortex.
 
-Version `0.1.0` is a preparation build. Installer checks and isolated filesystem
-deployment have passed. Live Vortex/game validation, the approved Nexus game
-domain, the first Nexus upload and extension review are still required.
-CI produces a local test candidate until the real domain is configured.
-Stable releases require the real domain and confirmed live acceptance.
+**Status:** `0.1.0` is a test candidate. Live Vortex/game validation and Nexus
+publication are pending. No stable extension download is available yet.
 
-This extension supplies game support. Gameplay mods and the UE4SS runtime
-are separate downloads; follow each mod's compatibility requirements.
+## Requirements
 
-## Install
+- [the cabin game on Steam](https://store.steampowered.com/app/4406280/the_cabin_game/) for Windows, app ID `4406280`.
+- [Vortex for Windows](https://www.nexusmods.com/site/mods/1). The validated Vortex version will be recorded before the first stable release.
+- A game-compatible [UE4SS runtime](https://github.com/UE4SS-RE/RE-UE4SS) for Lua/native mods. Use the version required by the gameplay mod.
 
-1. Obtain the extension ZIP from an official release, or build a test candidate
-   using the instructions below. Extract the outer GitHub Actions artifact ZIP
-   first; install the inner extension ZIP.
-2. In Vortex, open **Extensions**, drop the extension ZIP onto the installation
-   area, and restart Vortex.
-3. Open **Games**, find **the cabin game**, and select **Manage**. If discovery
-   fails, select the game folder containing `the_cabin_game.exe`.
-4. Install a compatible gameplay mod and select **Deploy**.
+Install gameplay mods and UE4SS separately. The extension does not download a
+runtime or choose its version for you.
 
-See the [packaged user guide](extension/README.md) for supported layouts,
-UE4SS activation markers, and removal behavior.
+## Install a test build
 
-## Supported archives
+1. Open a successful [Check and build run](https://github.com/DooDesch-Mods/TheCabinGame-Vortex/actions/workflows/ci.yml) and download **vortex-package**.
+2. Extract the artifact ZIP. The inner extension ZIP is the installable file.
+3. In Vortex, open **Extensions**, drop that ZIP into the installation area, and restart Vortex.
+4. Open **Games**, find **the cabin game**, and select **Manage**.
+5. Install a compatible gameplay mod and select **Deploy**.
 
-| Layout | Destination |
+Builds without the approved Nexus domain use a local game ID. They cannot route
+the game's Nexus downloads. Final-domain packages need live Vortex/game validation
+before a stable release.
+
+## Game detection
+
+Vortex searches Steam for app `4406280`. If discovery fails, select the game
+folder manually. That folder must contain both files:
+
+```text
+the_cabin_game.exe
+the_cabin_game/Binaries/Win64/the_cabin_game-Win64-Shipping.exe
+```
+
+## Supported mods
+
+Paths below are relative to the game folder.
+
+| Archive layout | Installed location |
 |---|---|
 | Loose or wrapped `.pak` files | `the_cabin_game/Content/Paks/~mods` |
-| Matching `.utoc` / `.ucas` pairs | Same destination; names are preserved |
+| Matching `.utoc` and `.ucas` files | Same folder; filenames are preserved |
 | Game-root `the_cabin_game/Content/Paks/...` | Original path, including `LogicMods` |
 | Game-root `the_cabin_game/Binaries/Win64/ue4ss/...` | Original path |
 | `Mods/<ModName>/...` | `the_cabin_game/Binaries/Win64/ue4ss/Mods/<ModName>` |
 
-Independent UE4SS Lua/native mods must include `enabled.txt` in their mod folder.
-The installer rejects unsafe paths, destination collisions, incomplete IoStore
-pairs, base-game container replacements, and unsupported archive layouts.
-It also rejects standalone mods that replace shared `mods.txt`/`mods.json`.
+Independent Lua/native mods need `enabled.txt` inside their mod folder. Standalone
+mods must not replace the shared `mods.txt` or `mods.json`. Explicit game-root
+paths are required for `LogicMods`; the extension does not inspect PAK mount points.
+See the [mod author guide](docs/mod-author.md) for archive examples and the packaging tool.
 
-## Build and check
+## Disable or remove mods
 
-Prerequisites: Windows, Node.js 24, and Python 3.13.
+Close the game before changing deployed files. Disable a mod and select **Deploy**
+to remove its deployed files. **Purge** removes all files managed by Vortex.
+**Remove** deletes the mod's staged copy. Generated saves, logs and mod state
+remain outside the deployment manifest. Follow the gameplay mod's uninstall guide.
+
+## Troubleshooting
+
+| Problem | Check |
+|---|---|
+| Game is not detected | Select the folder containing both files listed under Game detection. |
+| IoStore archive is rejected | Include matching `.utoc` and `.ucas` files from the same mod build. |
+| UE4SS archive is rejected | Use `Mods/<Name>/...` or game-root paths and include `<Name>/enabled.txt`. |
+| Mod installs but has no effect | Check the mod's game/runtime requirements and its current loader log. PAK mounting still needs live validation. |
+
+For unresolved problems, use the support link above. Include your extension,
+Vortex, game and UE4SS versions, the archive's file list, the error text, and
+steps to reproduce the problem.
+
+## Development
+
+Use Windows, Node.js 24 and Python 3.13.
 
 ```powershell
 python -m pip install -r requirements.txt
 node --test tests/extension.test.js
 python tools/build-extension.py
-python tools/verify-preparation.py
+python tools/verify-tooling.py
 python tests/test_release.py
 ```
 
-The default build creates `dist/TheCabinGame-Vortex-0.1.0-local-candidate.zip`
-and a JSON receipt containing its SHA-256 and configuration. To build with the
-approved Nexus domain:
+The builder writes an extension ZIP and SHA-256 receipt under `dist`. To configure
+both packaged game mappings, pass `--nexus-domain <approved-domain>`. Do not guess
+the domain. Changing the local game ID requires a new Vortex test profile.
 
-```powershell
-python tools/build-extension.py --nexus-domain <approved-domain>
-```
-
-The builder sets both the game ID and Nexus mapping in the ZIP. Do not guess the
-domain. Switching from the local ID requires a new Vortex test profile.
-
-The tests cover installer contracts and hardlink deployment in isolated fixtures.
-They do not establish live game discovery, game launch, PAK mounting, UE4SS
-activation, or Nexus download routing.
-
-## Publishing and contributing
-
-- [Nexus setup and release guide](NEXUS-SETUP.md)
-- [GitHub publishing workflow](publishing/README.md)
-- [Gameplay mod packaging guide](MOD-HANDOFF.md)
-- [New-game submission](submission/game-request.md)
-- [Extension upload fields](submission/vortex-upload.md)
-- [Nexus review checklist](submission/review-issue.md)
-
-Report bugs or submit pull requests in the
-[GitHub repository](https://github.com/DooDesch-Mods/TheCabinGame-Vortex).
-Include the extension and Vortex versions, archive layout, observed behavior,
-and reproduction steps. Include live-game evidence for compatibility claims.
+Automated checks cover installer rules, isolated hardlink deployment, packaging,
+document links and release guards. They do not establish live game compatibility.
+See [GitHub publishing](docs/releases.md) for the release workflow.
+Pull requests are welcome in this repository.
 
 ## License and credits
 
-Copyright (c) 2026 DooDesch. This repository's extension, tools, documentation,
-and original cabin illustration are licensed under **GPL-3.0-only**.
-Modification and redistribution, including commercial redistribution, are
-allowed under the GPL terms. Preserve required notices and provide corresponding
-source. See [LICENSE.md](LICENSE.md) and [credits](extension/CREDITS.md).
+Copyright (c) 2026 DooDesch. Extension code, tools, documentation and original
+artwork use [GPL-3.0-only](LICENSE.md). Redistribution and modification are allowed
+under its terms. See [credits](extension/CREDITS.md).
 
-The separate gameplay mod retains its own license. No game code, game assets,
-screenshots, or UE4SS binaries are included. This is an unofficial community
-extension for the game developed and published by Twisted Corridor.
+This is an unofficial extension for the game developed and published by Twisted
+Corridor. No game assets or UE4SS binaries are included. Gameplay mods retain
+their own licenses.

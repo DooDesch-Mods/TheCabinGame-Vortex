@@ -1,5 +1,7 @@
 # GitHub publishing
 
+> 🛟 **Need help or found a bug?** Get support at [support.doodesch.de/thecabingame-vortex](https://support.doodesch.de/thecabingame-vortex).
+
 Repository: https://github.com/DooDesch-Mods/TheCabinGame-Vortex
 
 ## Continuous integration
@@ -45,12 +47,5 @@ requires its returned version ID and records that acknowledgement in the job
 summary. After a failed or timed-out upload, inspect Nexus before retrying:
 an observation timeout does not prove no upload occurred.
 
-## Separate gameplay publication
-
-[gameplay-publish.example.yml](gameplay-publish.example.yml) is a template for
-the gameplay mod's repository. Adapt its asset name and build/acceptance process
-before enabling it. It is not an active workflow in this extension repository.
-The gameplay mod retains its own license; this repository uses GPL-3.0-only.
-
-See the [complete setup guide](../NEXUS-SETUP.md) for the first Nexus pages,
-live checks, source links, and maintainer review.
+Initial Nexus pages, live checks and maintainer review must be completed before
+the extension can appear in Vortex's public listing.

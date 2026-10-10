@@ -1,18 +1,18 @@
-# Gameplay mod packaging guide
+# Mod archive authoring
 
-Package a tested gameplay release in a layout supported by the Vortex extension.
-Gameplay implementation, validation, and licensing remain the mod author's
-responsibility; this repository supplies installer support and packaging tools.
+Package a gameplay release in a layout supported by the Vortex extension.
+The extension supplies installer support and packaging tools. Mod authors
+choose their runtime requirements and license and validate their mod in the game.
 
 ## Archive layout
 
 ```text
-Mods/CabinRejoin/Scripts/main.lua
-Mods/CabinRejoin/enabled.txt
-Mods/CabinRejoin/dlls/main.dll
-the_cabin_game/Content/Paks/~mods/CabinRejoin_P.pak
-the_cabin_game/Content/Paks/~mods/CabinRejoin_P.utoc
-the_cabin_game/Content/Paks/~mods/CabinRejoin_P.ucas
+Mods/ExampleMod/Scripts/main.lua
+Mods/ExampleMod/enabled.txt
+Mods/ExampleMod/dlls/main.dll
+the_cabin_game/Content/Paks/~mods/ExampleMod_P.pak
+the_cabin_game/Content/Paks/~mods/ExampleMod_P.utoc
+the_cabin_game/Content/Paks/~mods/ExampleMod_P.ucas
 README.md
 LICENSE
 ```
@@ -36,7 +36,7 @@ mod runs require their own documented lifecycle and uninstall behavior.
 From this repository:
 
 ```powershell
-python tools/package-game-mod.py <release-payload-folder> --name CabinRejoin --version 0.1.0
+python tools/package-game-mod.py <release-payload-folder> --name ExampleMod --version 0.1.0
 ```
 
 The tool adds missing independent activation markers, checks the actual
@@ -50,25 +50,3 @@ supported multiplayer/host cases, persistence, and uninstall behavior in the gam
 Then test the exact ZIP through Vortex installation, deployment, disable,
 re-enable and purge before its first Nexus upload.
 
-## First Nexus upload
-
-Provide the accepted package, final name/version, accurate description,
-requirements, license, and original screenshots. Once Nexus approves the game
-section, use its actual domain to rebuild the extension:
-
-```powershell
-python tools/build-extension.py --nexus-domain <approved-domain>
-```
-
-The local ID `thecabingame` is provisional and is not a confirmed Nexus domain.
-
-## Gameplay license
-
-The gameplay mod retains the DooDesch license terms used for Valheim
-ServerPasswordOnce. Adapt that project's license title, release channels, and
-contact details while preserving its permissions and restrictions, subject to
-the gameplay mod's own dependency licenses.
-
-The Vortex extension is separately licensed under GPL-3.0-only. Its `LICENSE.md`
-is not the gameplay license template. Installing a separate gameplay mod through
-Vortex does not by itself apply the extension's license to that mod.

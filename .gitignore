@@ -1,8 +1,6 @@
 dist/
 evidence/
-research/
 __pycache__/
 *.pyc
 .env
 .env.*
-tools/fetch-references.py
