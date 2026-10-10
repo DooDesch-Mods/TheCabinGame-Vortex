@@ -1,0 +1,94 @@
+name: Release and update Nexus
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag, e.g. v0.1.0 (check existing Nexus version before retry)
+        type: string
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: nexus-release-${{ github.repository }}
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.event_name == 'workflow_dispatch' || github.event.release.prerelease == false
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Resolve release tag
+        id: target
+        env:
+          EVENT_TAG: ${{ github.event.release.tag_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+        shell: pwsh
+        run: |
+          $releaseTag = if ($env:INPUT_TAG) { $env:INPUT_TAG } else { $env:EVENT_TAG }
+          if ($releaseTag -notmatch '^v[0-9]+\.[0-9]+\.[0-9]+$') { throw "Invalid release tag: $releaseTag" }
+          "tag=$releaseTag" >> $env:GITHUB_OUTPUT
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.target.outputs.tag }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install -r requirements.txt
+      - name: Verify and prepare release
+        id: release
+        env:
+          RELEASE_TAG: ${{ steps.target.outputs.tag }}
+          NEXUS_GAME_DOMAIN: ${{ vars.NEXUS_GAME_DOMAIN }}
+          NEXUS_FILE_GROUP_ID: ${{ vars.NEXUS_FILE_GROUP_ID }}
+          NEXUS_LIVE_TESTED: ${{ vars.NEXUS_LIVE_TESTED }}
+          NEXUS_API_KEY: ${{ secrets.NEXUSMODS_API_KEY }}
+        run: |
+          New-Item -ItemType Directory -Force evidence | Out-Null
+          node --test tests/extension.test.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/prepare-release.py
+      - name: Attach checked ZIP to GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.target.outputs.tag }}
+          ASSET: ${{ steps.release.outputs.asset }}
+        run: |
+          $assetReceipt = [System.IO.Path]::ChangeExtension($env:ASSET, '.json')
+          gh release upload $env:RELEASE_TAG $env:ASSET $assetReceipt --repo $env:GITHUB_REPOSITORY --clobber
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload new file version to Nexus
+        if: steps.release.outputs.nexus_ready == 'true'
+        # Nexus-Mods/upload-action v1.0.0-beta.10, pinned to the verified commit.
+        uses: Nexus-Mods/upload-action@c96019556046053aa26044b44396cd38929daf23
+        id: nexus
+        with:
+          api_key: ${{ secrets.NEXUSMODS_API_KEY }}
+          file_id: ${{ vars.NEXUS_FILE_GROUP_ID }}
+          filename: ${{ steps.release.outputs.asset }}
+          version: ${{ steps.release.outputs.version }}
+          display_name: the cabin game - Vortex Support ${{ steps.release.outputs.version }}
+          description: See the matching GitHub release for changes and validation.
+          category: main
+          primary_mod_manager_download: true
+          allow_mod_manager_download: true
+          archive_existing_version: true
+          update_mod_version: true
+      - name: Record confirmed Nexus upload
+        if: steps.release.outputs.nexus_ready == 'true'
+        env:
+          VERSION_ID: ${{ steps.nexus.outputs.version_id }}
+        run: |
+          if (-not $env:VERSION_ID) { throw 'Nexus action returned no uploaded version ID' }
+          "Nexus acknowledged uploaded version ID: $env:VERSION_ID" >> $env:GITHUB_STEP_SUMMARY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release-evidence
+          path: evidence/
+          if-no-files-found: warn

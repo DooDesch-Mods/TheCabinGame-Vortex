@@ -1,0 +1,1 @@
+Adds Steam discovery and installation routes for PAK, IoStore and UE4SS mods in the cabin game. Manage supported mods through Vortex. Requires a separate compatible UE4SS runtime for Lua/native mods.

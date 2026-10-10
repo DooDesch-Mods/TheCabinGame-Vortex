@@ -1,0 +1,32 @@
+[b]the cabin game — Vortex Support[/b]
+
+Community game support extension by DooDesch for the Steam Windows version of the cabin game (app 4406280).
+
+[b]Features[/b]
+[list]
+[*]Discover the Steam installation, or select its folder manually.
+[*]Install loose PAK files and matching IoStore container pairs.
+[*]Install UE4SS Lua/native mods from Mods/<ModName> or game-root archive layouts.
+[*]Keep mixed PAK and UE4SS files from one mod in their intended destinations.
+[*]Use Vortex deployment, conflicts, disable and purge for managed files.
+[/list]
+
+[b]Install the extension[/b]
+Open Extensions in Vortex, drop the extension ZIP onto the installation area and restart Vortex. Find the cabin game in Games and select Manage. For manual discovery, choose the directory containing the_cabin_game.exe.
+
+[b]Requirements[/b]
+Vortex on Windows and the Steam version of the cabin game. Lua/native mods additionally require a game-compatible [url=https://github.com/UE4SS-RE/RE-UE4SS]UE4SS runtime[/url]; follow the gameplay mod author's version requirement. No runtime or gameplay mod is bundled with this extension.
+
+[b]For mod authors[/b]
+Loose .pak files install into the_cabin_game/Content/Paks/~mods. .utoc and .ucas must have matching names and ship together. Game-root Content/Paks layouts retain their paths, including LogicMods. Mods/<Name>/... installs into the_cabin_game/Binaries/Win64/ue4ss/Mods/<Name>.
+
+Include enabled.txt in each independent UE4SS mod folder. Shared mods.txt/mods.json replacements are rejected for standalone mods. Archives with unsafe paths, destination collisions, incomplete IoStore pairs or unsupported layouts produce an installation error. This version does not supply a load-order editor or an automatic loader download.
+
+[b]Removal[/b]
+Close the game, disable the mod and Deploy, or Purge managed files. Remove the mod to delete its staged files. Loader logs and runtime-generated mod state may remain; use the gameplay mod's uninstall instructions for those files.
+
+[b]License and credits[/b]
+Extension code and original illustrative cabin artwork: DooDesch, custom source-available license as used for ServerPasswordOnce; see LICENSE.md. The cabin game is developed/published by Twisted Corridor. This is an unofficial community extension.
+
+[b]Preparation status[/b]
+This draft is not yet published or Nexus-reviewed. The installer and isolated filesystem deployment have been checked. The Vortex UI and in-game acceptance checks must be completed before this draft is used as a public release description.
