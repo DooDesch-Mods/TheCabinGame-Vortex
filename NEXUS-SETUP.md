@@ -1,145 +1,147 @@
-# Step by Step: Nexus und GitHub
+# Nexus setup and release guide
 
-Stand 10. Oktober 2026. Erweiterung vorbereitet; Gameplay-Mod und reale
-Vortex-/Spielprüfung stehen noch aus. Das erste Anlegen der Nexus-Seiten und
-die Freigabe durch Nexus sind einmalig; spätere Dateiversionen können über
-GitHub Actions veröffentlicht werden.
+This guide covers the first Nexus game entry, extension upload, live validation,
+and subsequent GitHub-driven updates. The extension is currently a preparation
+build; complete the live checks before publishing a stable release.
 
-## 1. Gameplay-Mod abschließen
+## 1. Prepare the first gameplay mod
 
-Die andere Session liefert das akzeptierte Release-ZIP, Version, Requirements,
-Beschreibung und eigene Screenshots. Ein technisch noch ungeprüfter Prototyp
-erfüllt Nexus' Voraussetzung eines nutzbaren Mods nicht. Der
-[Paketvertrag](MOD-HANDOFF.md) hilft bei der Vortex-kompatiblen Struktur.
+Prepare a usable, tested gameplay mod with a release ZIP, version, requirements,
+description, license, and your own gameplay screenshots. See the
+[packaging guide](MOD-HANDOFF.md) for archive layouts.
 
-Lizenz für Gameplay-Mod und Erweiterung: wie **Valheim ServerPasswordOnce**.
-Eigener DooDesch-Lizenztext, Quellcode einsehbar/private Änderungen erlaubt,
-öffentliche Weiterverteilung grundsätzlich nur mit schriftlicher Erlaubnis,
-mit der im Text definierten Ausnahme bei Aufgabe. Siehe [LICENSE.md](LICENSE.md).
+The gameplay mod uses the separate DooDesch license based on Valheim
+ServerPasswordOnce. Adapt that project's text for the gameplay mod.
+The Vortex extension, tools, documentation and original illustration use
+[GPL-3.0-only](LICENSE.md). The extension license is not the gameplay mod template.
 
-## 2. Spieleintrag anlegen und ersten Mod hochladen
+## 2. Create the Nexus game entry
 
-1. Bei [Nexus Mods](https://www.nexusmods.com/) als DooDesch anmelden.
-2. Allgemeinen **Upload a mod**-Dialog öffnen.
-3. In der Spielauswahl `the cabin game` und `The Cabin Game` suchen.
-4. Falls nicht vorhanden: **ADD NEW GAME**, offiziellen Steam-Titel
-   `the cabin game` eintragen, danach **ADD GAME**.
-5. Den fertigen Gameplay-Mod hochladen: Name/Version aus seiner Session,
-   Kategorie gemäß Funktion, Summary/Beschreibung, Requirements, Bilder und
-   Lizenz-Permissions. ZIP als **Main File** und Mod-Manager-Download auswählen.
-6. Upload abschließen. Nexus prüft und entscheidet über den neuen Spielebereich.
+1. Sign in to [Nexus Mods](https://www.nexusmods.com/) as DooDesch.
+2. Open **Upload a mod** and search for both `the cabin game` and `The Cabin Game`.
+3. If the game is absent, select **ADD NEW GAME**, enter the official title
+   `the cabin game`, and select **ADD GAME**.
+4. Upload the tested gameplay mod with its correct category, description,
+   requirements, screenshots, and license permissions. Upload its ZIP as a
+   **Main File** with Mod Manager download enabled.
+5. Complete the upload and wait for Nexus to approve the new game section.
 
-[Vorbereitete Spieldaten](submission/game-request.md). Laut
-[Nexus-Hilfe](https://help.nexusmods.com/article/104-how-can-i-add-a-new-game-to-nexus-mods)
-muss ein nutzbarer Mod vorhanden sein. Nach mehr als sieben Werktagen ohne
-Freigabe nennt Nexus Support als Kontakt; hier wird keine Nachricht versendet.
+Use the [prepared game details](submission/game-request.md).
+[Nexus requires a usable initial mod](https://help.nexusmods.com/article/104-how-can-i-add-a-new-game-to-nexus-mods).
+That page provides the support route if approval takes more than seven working days.
 
-## 3. Tatsächliche Nexus-Werte notieren
+## 3. Record the actual Nexus identifiers
 
-Nach Erstellung/Freigabe benötigt die Automation:
-
-| Wert | Woher |
+| Value | Where to find it |
 |---|---|
-| Game-Domain | Tatsächlicher Pfad des neuen Spielebereichs: `nexusmods.com/<domain>` |
-| Gameplay-Mod-URL | Seite des ersten Mods |
-| Gameplay-Datei-Gruppen-ID | **Files → API Info**, in der aktuellen Oberfläche ggf. unter **Advanced**, oder Manage Files → Edit |
+| Game domain | The approved game section URL: `nexusmods.com/<domain>` |
+| Gameplay mod URL | The published gameplay mod page |
+| Gameplay file-group ID | **Files → API Info**, possibly under **Advanced**, or **Manage Files → Edit** |
 
-Die Nummer am Ende der Mod-URL ist **nicht** die Datei-Gruppen-ID. Domain
-nicht raten. Die Vortex-Erweiterung hat anschließend eine eigene Datei-ID.
-Offizielle Erklärung: [Nexus Upload Action](https://github.com/Nexus-Mods/upload-action).
+The mod ID at the end of a mod page URL is not its file-group ID. The extension
+will have its own file-group ID. See the
+[official upload action documentation](https://github.com/Nexus-Mods/upload-action).
 
-## 4. Vortex-Paket mit echter Domain bauen
+## 4. Build the final-domain extension
 
-Im [GitHub-Repo](https://github.com/DooDesch-Mods/TheCabinGame-Vortex) unter
-**Settings → Secrets and variables → Actions → Variables → New repository variable**
-`NEXUS_GAME_DOMAIN` auf die echte Game-Domain setzen.
+In the [extension repository](https://github.com/DooDesch-Mods/TheCabinGame-Vortex),
+open **Settings → Secrets and variables → Actions → Variables** and set
+`NEXUS_GAME_DOMAIN` to the approved game domain.
 
-Danach **Actions → Check and build → Run workflow** starten. Sobald grün,
-das Artefakt **vortex-package** herunterladen und entpacken. Darin liegt das
-Extension-ZIP `TheCabinGame-Vortex-0.1.0.zip` samt Prüfnachweis. Das äußere
-GitHub-Artefakt-ZIP wird nicht in Vortex/Nexus installiert.
+Run **Actions → Check and build → Run workflow**. Download the successful
+`vortex-package` artifact and extract it. Install the inner
+`TheCabinGame-Vortex-0.1.0.zip`, rather than the outer artifact ZIP.
 
-Alternativ lokal im Repo bauen:
+Alternatively, build locally:
 
 ```powershell
 python -m pip install -r requirements.txt
-python tools/build-extension.py --nexus-domain <actual-domain>
+python tools/build-extension.py --nexus-domain <approved-domain>
 ```
 
-## 5. In Vortex und im Spiel prüfen
+Remove the earlier local-ID extension and use a new test profile when switching
+game IDs. Both the packaged game ID and `nexusPageId` must match the real domain.
 
-1. Vortex öffnen, **Extensions** wählen, Extension-ZIP auf den Installationsbereich
-   ziehen und Vortex neu starten.
-2. Unter **Games** nach `the cabin game` suchen und **Manage** wählen. Bei
-   manueller Erkennung den Ordner mit `the_cabin_game.exe` auswählen.
-3. Fertigen Gameplay-Mod installieren und **Deploy** ausführen.
-4. Spiel starten und die tatsächliche Modwirkung prüfen; bei UE4SS muss der
-   Mod im aktuellen Loader-Log geladen sein, PAK-Inhalte müssen im Spiel wirken.
-5. Spiel schließen, Mod deaktivieren und Deploy: Dateien und Wirkung weg.
-   Erneut aktivieren/Deploy: Wirkung wieder da. **Purge**: nur verwaltete
-   Moddateien weg, Originaldateien erhalten. Spielstände gemäß Mod-Anleitung prüfen.
+## 5. Validate in Vortex and the game
 
-Die vorhandenen 21 technischen Tests ersetzen diese Prüfung nicht.
+1. Install the ZIP through **Extensions**, restart Vortex, and manage the game.
+2. Confirm Steam discovery and manual folder selection, then launch the game.
+3. Install the tested gameplay ZIP and **Deploy**. Check its destination files.
+4. Run the game and observe the advertised mod behavior. Confirm current UE4SS
+   loader activation for Lua/native mods, and actual PAK mounting for PAK mods.
+5. Close the game, disable the mod and Deploy. Confirm its managed files and
+   effects are removed. Re-enable and Deploy; confirm they return.
+6. **Purge** managed files and check that original game files remain intact.
+   Handle generated saves/logs according to the gameplay mod's documentation.
 
-## 6. Vortex-Erweiterung einmalig bei Nexus hochladen
+Record the extension commit, package hash, Vortex version, game build, mod/runtime
+versions and results. The automated installer tests do not replace these checks.
 
-1. [Modding Tools](https://www.nexusmods.com/site) öffnen → Upload.
-2. Kategorie **Vortex > Extensions**.
-3. Name `the cabin game - Vortex Support`, Version `0.1.0`.
-4. [Summary](submission/vortex-summary.txt), [BBCode-Beschreibung](submission/vortex-description.bbcode)
-   und [Uploadfelder](submission/vortex-upload.md) verwenden. Den Draft-
-   Status durch tatsächlich geprüfte Vortex-Version/Spielbuild/Testgrenzen ersetzen.
-5. `extension/gameart.png` als Bild; dasselbe Bild wie in der Erweiterung.
-6. Finale Extension-ZIP als **eine** Main File hochladen; Version exakt wie
-   `extension/info.json`. License/Permissions wie ServerPasswordOnce.
-7. Erweiterungs-URL und eigene **API Info Datei-Gruppen-ID** notieren.
+## 6. Upload the extension to Nexus
 
-[Offizielle Paketregeln](https://github.com/Nexus-Mods/Vortex-Backend/wiki/How-to-package-a-game-extension).
+1. Open [Modding Tools](https://www.nexusmods.com/site) and start an upload.
+2. Select **Vortex > Extensions**.
+3. Use `the cabin game - Vortex Support` and version `0.1.0`.
+4. Use the [summary](submission/vortex-summary.txt),
+   [description](submission/vortex-description.bbcode), and
+   [upload fields](submission/vortex-upload.md). Replace the preparation-status
+   paragraph with the recorded live validation and its actual limitations.
+5. Use `extension/gameart.png` as the extension image.
+6. Upload the final-domain extension ZIP as exactly **one Main File**. Its version
+   must match `extension/info.json`. Set permissions consistently with GPL-3.0-only.
+7. Record the extension URL and its **API Info file-group ID**.
 
-## 7. Nexus-Dateiupdates aktivieren
+Follow the [official extension packaging rules](https://github.com/Nexus-Mods/Vortex-Backend/wiki/How-to-package-a-game-extension).
+Link the source commit/tag matching the uploaded ZIP so recipients can obtain
+the corresponding source.
 
-Im Extension-Repo unter **Settings → Secrets and variables → Actions → Variables**:
+## 7. Enable automated Nexus updates
 
-| Variable | Inhalt |
+Set the following extension-repository Actions variables:
+
+| Variable | Value |
 |---|---|
-| `NEXUS_GAME_DOMAIN` | Domain des Spiels, obwohl die Extension selbst unter `/site` liegt |
-| `NEXUS_FILE_GROUP_ID` | API-Info-Gruppen-ID der **Extension**-Main-File |
-| `NEXUS_LIVE_TESTED` | `true`, nachdem Schritt 5 erfolgreich geprüft ist |
+| `NEXUS_GAME_DOMAIN` | Approved game domain, although the extension page is under `/site` |
+| `NEXUS_FILE_GROUP_ID` | The extension Main File's API Info file-group ID |
+| `NEXUS_LIVE_TESTED` | `true` after the final-domain package passes step 5 |
 
-Der vorhandene Org-Secret **NEXUSMODS_API_KEY** hat Sichtbarkeit `all` und ist
-damit für das neue Repo verfügbar. Den Schlüssel weder ins Repo noch in den
-Chat kopieren. Falls er später fehlt: unter GitHub Actions Secrets im Repo/Org
-setzen; Quelle [Nexus API Keys](https://www.nexusmods.com/settings/api-keys).
+Make the `NEXUSMODS_API_KEY` secret available to this repository through the
+organization or repository Actions settings. An organization secret was already
+available during setup; recheck its repository access if an upload reports it
+missing. Obtain keys from [Nexus API settings](https://www.nexusmods.com/settings/api-keys).
+Never commit a key or paste it into an issue or chat.
 
-Die Gameplay-Mod erhält in ihrem eigenen Repo ihre eigene Datei-Gruppen-ID.
-Eine [Workflow-Vorlage](publishing/gameplay-publish.example.yml) liegt hier bereit;
-ihre Build-/Release-Dateinamen müssen vom Gameplay-Owner angepasst werden.
+The gameplay mod uses its own repository and file-group ID. Adapt the separate
+[workflow example](publishing/gameplay-publish.example.yml) to its actual release
+asset and acceptance process.
 
-## 8. Vortex-Review anfordern
+## 8. Request the extension review
 
-Das [Review-Formular](https://github.com/Nexus-Mods/Vortex-Backend/issues/new?template=verify-extension.yaml)
-öffnen. [Vorbereitete Antworten](submission/review-issue.md) verwenden und
-echte Extension-/Game-URLs einsetzen. Verpackung und Live-Test nur bestätigen,
-wenn tatsächlich erledigt. Danach entscheidet Nexus über die Manifestaufnahme.
+Recheck for existing support, then open the
+[official review form](https://github.com/Nexus-Mods/Vortex-Backend/issues/new?template=verify-extension.yaml).
+Use the [prepared checklist](submission/review-issue.md), replace pending URLs,
+and confirm packaging/live tests only when complete. Nexus maintainers decide
+whether to add the extension to the Vortex listing.
 
-## 9. Künftige Updates über GitHub veröffentlichen
+After upload, test **Mod Manager Download** from the real gameplay mod page and
+confirm that the NXM link targets the configured game.
 
-1. Code ändern, `extension/info.json` auf z.B. `0.1.1` erhöhen, Commit pushen.
-2. Grüne **Check and build**-Prüfung abwarten.
-3. **Releases → Draft a new release**, Tag `v0.1.1`, Änderungen beschreiben.
-4. **Publish release**. Der Workflow testet den Code vom Tag, baut die ZIP,
-   hängt sie samt Prüfnachweis an den GitHub-Release und lädt die neue
-   Dateiversion bei Nexus hoch. Alte Nexus-Version wird archiviert, die neue
-   als primärer Mod-Manager-Download gesetzt.
-5. Grünen Workflow und bestätigte Nexus-Version-ID prüfen; Download einmal testen.
+## 9. Publish subsequent updates
 
-Der erste manuelle Nexus-Upload ist bereits `0.1.0`; nicht denselben Release
-nochmals automatisiert als neue Nexus-Version veröffentlichen. Mit `0.1.1`
-oder dem nächsten tatsächlichen Update beginnen. Bei Uploadfehlern vor Retry
-die Nexus-Dateiversion prüfen: Ein Timeout beweist nicht, dass nichts ankam.
+1. Update the extension and increment `extension/info.json`, for example to `0.1.1`.
+2. Run relevant live regression checks, push the change, and wait for green CI.
+   Reset `NEXUS_LIVE_TESTED` until acceptance is confirmed if behavior changes.
+3. Create a GitHub release with the matching tag, for example `v0.1.1`, and describe
+   changes, validation and compatibility limits.
+4. Publish the release. The workflow checks the tagged source, builds the ZIP,
+   attaches the ZIP/receipt, and uploads a new Nexus file version when configured.
+5. Confirm the successful workflow and Nexus version ID, then test a download.
 
-## Was bleibt einmalig/manuell?
+The first manual Nexus upload is already `0.1.0`; do not upload that version
+again as a subsequent automated update. Start with the next actual version.
+Before retrying a failed or timed-out upload, inspect the Nexus file state: an
+observation timeout does not prove the upload failed.
 
-Spieleantrag, Erstupload beider Seiten, Live-Test, tatsächliche IDs/Domain,
-Vortex-Review, Bilder/Seitenbeschreibung und gewählte Permissions. CI/Build,
-GitHub-Release-Dateien und spätere Nexus-Dateiupdates sind automatisierbar.
+Initial game/mod pages, the first extension upload, live tests, page permissions,
+images, and maintainer review require one-time manual work. CI, release assets,
+and subsequent Nexus file updates are automated.

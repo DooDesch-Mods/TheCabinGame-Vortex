@@ -1,78 +1,100 @@
-# Nexus und Vortex für the cabin game
+# the cabin game — Vortex Support
 
-Vorbereitet am 10. Oktober 2026. Der Gameplay-Mod entsteht separat; diese
-Integration ergänzt den Nexus-Spieleintrag und den Mod-Manager-Support.
-Öffentliches Repo: https://github.com/DooDesch-Mods/TheCabinGame-Vortex
+Community Vortex extension for the Steam Windows version of **the cabin game**
+(app ID `4406280`), maintained by DooDesch.
 
-## Ergebnis
+Discover the game, install PAK/IoStore and UE4SS mod archives, and manage their
+files through Vortex deployment, disable and purge.
 
-- Version 0.1.0: ZIP und Prüfnachweise werden als GitHub-Actions-Artefakte gebaut.
-- [Spieleantrag](submission/game-request.md), [Vortex-Uploadfelder](submission/vortex-upload.md),
-  [Summary](submission/vortex-summary.txt), [BBCode-Beschreibung](submission/vortex-description.bbcode),
-  [Review-Vorlage](submission/review-issue.md).
-- [Paketvertrag für die Mod-Session](MOD-HANDOFF.md) und überprüfbarer
-  [Gameplay-Paketierer](tools/package-game-mod.py).
-- [Step-by-Step-Guide](NEXUS-SETUP.md), [GitHub-Automation](publishing/README.md).
-- Lokale Prüfnachweise bleiben unter `evidence`; sie sind kein öffentlicher Quellcode.
+## Release status
 
-## Reihenfolge bis zur Veröffentlichung
+Version `0.1.0` is a preparation build. Installer checks and isolated filesystem
+deployment have passed. Live Vortex/game validation, the approved Nexus game
+domain, the first Nexus upload and extension review are still required.
+CI produces a local test candidate until the real domain is configured.
+Stable releases require the real domain and confirmed live acceptance.
 
-1. Andere Session schließt den Gameplay-Mod samt In-game-Acceptance ab.
-2. Mit diesem Mod bei Nexus `the cabin game` über **ADD NEW GAME** beantragen und
-   den Erstupload fertigstellen. Nexus entscheidet über Freigabe und Domain.
-3. Mit der echten Domain das finale Extension-Paket bauen:
+This extension supplies game support. Gameplay mods and the UE4SS runtime
+are separate downloads; follow each mod's compatibility requirements.
 
-   ```powershell
-   python tools/build-extension.py --nexus-domain <actual-nexus-domain>
-   ```
+## Install
 
-   Der Builder setzt im ZIP sowohl Game-ID als auch `nexusPageId`. Die Domain
-   nicht raten. Eine bereits genutzte lokale Test-Game-ID bleibt in alten
-   Vortex-Profilen gespeichert; für die endgültige ID ein neues Testprofil
-   anlegen und den lokalen Kandidaten vorher entfernen.
-4. Finales ZIP in Vortex importieren, Steam-Discovery/manuelle Erkennung und
-   Start testen. Den akzeptierten Mod installieren, seine Wirkung im Spiel
-   beobachten, deaktivieren, erneut aktivieren und purgen. Originaldateien
-   und den von Vortex erfassten Dateibestand danach kontrollieren.
-5. Extension unter Nexus Modding Tools, Kategorie **Vortex > Extensions** mit
-   genau einer Main File hochladen. Die beiden echten URLs in die Review-Vorlage
-   einsetzen und erst dann die Verifikation bei Nexus-Mods/Vortex-Backend einreichen.
-6. Einen Nexus-Download über **Mod Manager Download** mit der realen Domain testen.
+1. Obtain the extension ZIP from an official release, or build a test candidate
+   using the instructions below. Extract the outer GitHub Actions artifact ZIP
+   first; install the inner extension ZIP.
+2. In Vortex, open **Extensions**, drop the extension ZIP onto the installation
+   area, and restart Vortex.
+3. Open **Games**, find **the cabin game**, and select **Manage**. If discovery
+   fails, select the game folder containing `the_cabin_game.exe`.
+4. Install a compatible gameplay mod and select **Deploy**.
 
-Der Upload erzeugt keinen automatischen Manifest-Eintrag. Das Nexus-Team prüft
-die Erweiterung, bevor sie regulär in Vortex gelistet wird.
+See the [packaged user guide](extension/README.md) for supported layouts,
+UE4SS activation markers, and removal behavior.
 
-## Checks erneut ausführen
+## Supported archives
+
+| Layout | Destination |
+|---|---|
+| Loose or wrapped `.pak` files | `the_cabin_game/Content/Paks/~mods` |
+| Matching `.utoc` / `.ucas` pairs | Same destination; names are preserved |
+| Game-root `the_cabin_game/Content/Paks/...` | Original path, including `LogicMods` |
+| Game-root `the_cabin_game/Binaries/Win64/ue4ss/...` | Original path |
+| `Mods/<ModName>/...` | `the_cabin_game/Binaries/Win64/ue4ss/Mods/<ModName>` |
+
+Independent UE4SS Lua/native mods must include `enabled.txt` in their mod folder.
+The installer rejects unsafe paths, destination collisions, incomplete IoStore
+pairs, base-game container replacements, and unsupported archive layouts.
+It also rejects standalone mods that replace shared `mods.txt`/`mods.json`.
+
+## Build and check
+
+Prerequisites: Windows, Node.js 24, and Python 3.13.
 
 ```powershell
-node --test tests/extension.test.js
 python -m pip install -r requirements.txt
+node --test tests/extension.test.js
 python tools/build-extension.py
+python tools/verify-preparation.py
+python tests/test_release.py
 ```
 
-Auf diesem Rechner existieren alte Vortex-Daten, aber an den geprüften Standard-
-und Registry-Pfaden wurde keine ausführbare Installation gefunden. Die
-technischen Tests sind bestätigt; Vortex-UI, Steam-Start, Modwirkung im Spiel
-und Nexus-Download sind offen. Nexus-Spiel-/Mod-/Extension-Uploads bleiben ausstehend.
-Der öffentliche Integrationscode wird auf Wunsch über GitHub verwaltet.
-Der Gameplay-Checkpoint wurde nicht verändert.
+The default build creates `dist/TheCabinGame-Vortex-0.1.0-local-candidate.zip`
+and a JSON receipt containing its SHA-256 and configuration. To build with the
+approved Nexus domain:
 
-Die Lizenz entspricht ServerPasswordOnce: eigener DooDesch-Lizenztext,
-Quellcode einsehbar und private Änderungen erlaubt; öffentliche Weiterverteilung
-grundsätzlich nur mit schriftlicher Erlaubnis, mit der definierten Aufgabe-
-Ausnahme. Siehe [LICENSE.md](LICENSE.md). GitHub-Forks für Beiträge sind erlaubt.
+```powershell
+python tools/build-extension.py --nexus-domain <approved-domain>
+```
 
-## Quellen
+The builder sets both the game ID and Nexus mapping in the ZIP. Do not guess the
+domain. Switching from the local ID requires a new Vortex test profile.
 
-- [Nexus: neues Spiel hinzufügen](https://help.nexusmods.com/article/104-how-can-i-add-a-new-game-to-nexus-mods)
-- [Nexus: Extension-Paket](https://github.com/Nexus-Mods/Vortex-Backend/wiki/How-to-package-a-game-extension)
-- [Nexus: Review-Prozess](https://forums.nexusmods.com/topic/13480550-changes-to-how-we-review-community-game-extensions/)
-- [Aktuelles Review-Formular](https://github.com/Nexus-Mods/Vortex-Backend/blob/main/.github/ISSUE_TEMPLATE/verify-extension.yaml)
-- [Vortex API](https://github.com/Nexus-Mods/Vortex/blob/master/packages/vortex-api/README.md)
-- [UE4SS-Aktivierungsmarker](https://docs.ue4ss.com/guides/installing-a-c%2B%2B-mod.html)
-- [Offizielles Spiel](https://store.steampowered.com/app/4406280/the_cabin_game/)
+The tests cover installer contracts and hardlink deployment in isolated fixtures.
+They do not establish live game discovery, game launch, PAK mounting, UE4SS
+activation, or Nexus download routing.
 
-Primärquellen-Abrufe und ihre Fehler liegen unter `evidence/sources`.
-Die verlinkte Vortex-Backend-Test-Wiki-Seite lieferte 404, die Review-Wiki ist
-ein Stub; das tatsächliche YAML-Formular ist vorhanden. Die Interpretation
-stützt sich auf dieses Formular und die vollständigen Paket-/API-Quellen.
+## Publishing and contributing
+
+- [Nexus setup and release guide](NEXUS-SETUP.md)
+- [GitHub publishing workflow](publishing/README.md)
+- [Gameplay mod packaging guide](MOD-HANDOFF.md)
+- [New-game submission](submission/game-request.md)
+- [Extension upload fields](submission/vortex-upload.md)
+- [Nexus review checklist](submission/review-issue.md)
+
+Report bugs or submit pull requests in the
+[GitHub repository](https://github.com/DooDesch-Mods/TheCabinGame-Vortex).
+Include the extension and Vortex versions, archive layout, observed behavior,
+and reproduction steps. Include live-game evidence for compatibility claims.
+
+## License and credits
+
+Copyright (c) 2026 DooDesch. This repository's extension, tools, documentation,
+and original cabin illustration are licensed under **GPL-3.0-only**.
+Modification and redistribution, including commercial redistribution, are
+allowed under the GPL terms. Preserve required notices and provide corresponding
+source. See [LICENSE.md](LICENSE.md) and [credits](extension/CREDITS.md).
+
+The separate gameplay mod retains its own license. No game code, game assets,
+screenshots, or UE4SS binaries are included. This is an unofficial community
+extension for the game developed and published by Twisted Corridor.

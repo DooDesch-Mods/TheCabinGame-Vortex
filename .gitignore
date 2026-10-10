@@ -5,5 +5,4 @@ __pycache__/
 *.pyc
 .env
 .env.*
-tools/apply-license.py
 tools/fetch-references.py

@@ -33,7 +33,10 @@ def main():
     target.replace(evidence / target.name)
     target.with_suffix('.json').replace(evidence / target.with_suffix('.json').name)
     broken = []
-    for file in list(ROOT.glob('*.md')) + list((ROOT / 'extension').glob('*.md')) + list((ROOT / 'submission').glob('*.md')):
+    documents = list(ROOT.glob('*.md'))
+    for folder in ['extension', 'submission', 'publishing']:
+        documents.extend((ROOT / folder).glob('*.md'))
+    for file in documents:
         for link in re.findall(r'\]\(([^)]+)\)', file.read_text(encoding='utf-8')):
             if not re.match(r'https?://', link) and not (file.parent / link.split('#')[0]).exists():
                 broken.append({'file': str(file.relative_to(ROOT)), 'link': link})

@@ -16,23 +16,24 @@ def main():
     group = os.environ.get('NEXUS_FILE_GROUP_ID', '')
     tested = os.environ.get('NEXUS_LIVE_TESTED', '') == 'true'
     has_key = bool(os.environ.get('NEXUS_API_KEY'))
-    configured = bool(domain and group)
+    if not re.fullmatch(r'[a-z0-9]+', domain):
+        raise ValueError('stable release requires NEXUS_GAME_DOMAIN: the actual approved Nexus domain; use CI for local candidates')
+    if not tested:
+        raise ValueError('NEXUS_LIVE_TESTED is not true; actual Vortex/game acceptance is still pending')
+    configured = bool(group)
     if configured and not re.fullmatch(r'\d+', group):
         raise ValueError('NEXUS_FILE_GROUP_ID must be the numeric API Info file-group ID')
-    if configured and not tested:
-        raise ValueError('Nexus target configured, but NEXUS_LIVE_TESTED is not true; actual Vortex/game acceptance is still pending')
     if configured and not has_key:
         raise ValueError('Nexus target configured, but NEXUSMODS_API_KEY is unavailable')
     command = ['python', str(ROOT / 'tools' / 'build-extension.py')]
-    if domain:
-        command.extend(['--nexus-domain', domain])
+    command.extend(['--nexus-domain', domain])
     result = subprocess.run(command, capture_output=True, text=True, encoding='utf-8')
     if result.returncode:
         raise RuntimeError(f'extension build failed (exit {result.returncode}): {result.stderr}')
     build = json.loads(result.stdout)
     asset = 'dist/' + build['archive']
     report = {'version': version, 'asset': asset, 'nexusReady': configured,
-              'nexusStatus': 'configured' if configured else 'deliberate skip: initial Nexus game/file IDs pending',
+              'nexusStatus': 'configured' if configured else 'deliberate skip: first extension upload/file-group ID pending',
               'sha256': build['sha256']}
     evidence = ROOT / 'evidence'
     evidence.mkdir(exist_ok=True)

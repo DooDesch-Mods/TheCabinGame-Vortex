@@ -36,5 +36,12 @@ code and isolated filesystem deployment have been checked; testing in Vortex
 and in the running game remains pending. No reconnect functionality is supplied
 by this extension. The gameplay mod is developed separately.
 
-Code/art license: the DooDesch custom source-available license, matching ServerPasswordOnce. `gameart.png` is original illustrative artwork,
+Copyright (c) 2026 DooDesch. Code, documentation and original artwork are
+licensed under GPL-3.0-only. You may modify and redistribute them under the
+GPL terms, including commercially, with the required notices and corresponding
+source. `gameart.png` is original illustrative artwork,
 not an official game screenshot or logo. See LICENSE.md and CREDITS.md.
+
+Complete source, build tools and editable artwork:
+[DooDesch-Mods/TheCabinGame-Vortex](https://github.com/DooDesch-Mods/TheCabinGame-Vortex).
+For a published release, use the source tag/commit linked on its download page.

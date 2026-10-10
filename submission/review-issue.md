@@ -13,8 +13,8 @@ PENDING — paste the real https://www.nexusmods.com/site/mods/... URL after upl
 PENDING — paste the actual approved game section URL. Do not guess its domain.
 
 ## Existing Extension URL
-No existing extension identified in the public searches on 10 October 2026.
-Recheck Nexus/Vortex immediately before submission.
+Recheck Nexus/Vortex immediately before submission. Enter any existing
+extension URL, or state that none was found in that check.
 
 ## New features
 Steam discovery for app 4406280; manual game-folder detection; installation of
@@ -27,6 +27,7 @@ layouts and duplicate destinations; Vortex-managed deployment and purge.
 
 ## Packaging
 - [x] Local candidate contains index.js, info.json, config.json and 640x360 PNG gameart at the archive root.
+- [ ] Uploaded package includes GPL-3.0-only and a link to its matching source commit/tag.
 - [ ] Final archive has the real Nexus domain and exactly matches the uploaded version and main file.
 
 ## Testing

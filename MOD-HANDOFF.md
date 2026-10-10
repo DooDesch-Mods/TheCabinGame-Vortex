@@ -1,16 +1,15 @@
-# Vertrag für die Gameplay-Mod-Session
+# Gameplay mod packaging guide
 
-Ziel: Der Gameplay-Mod liefert den ersten nutzbaren Upload für den neuen
-Nexus-Spieleintrag. Diese Session besitzt nur `integrations/nexus-vortex`;
-`STATE.md`, `tools/runtime`, `tools/static` und der Gameplay-Mod bleiben beim
-bisherigen Owner. Kein Gameplay-Paket wurde hier verändert oder veröffentlicht.
+Package a tested gameplay release in a layout supported by the Vortex extension.
+Gameplay implementation, validation, and licensing remain the mod author's
+responsibility; this repository supplies installer support and packaging tools.
 
-Bevorzugte Archivstruktur (wie bei Palvolve, aber Cabin-Pfade):
+## Archive layout
 
 ```text
 Mods/CabinRejoin/Scripts/main.lua
 Mods/CabinRejoin/enabled.txt
-Mods/CabinRejoin/dlls/main.dll            # nur falls tatsächlich benötigt
+Mods/CabinRejoin/dlls/main.dll
 the_cabin_game/Content/Paks/~mods/CabinRejoin_P.pak
 the_cabin_game/Content/Paks/~mods/CabinRejoin_P.utoc
 the_cabin_game/Content/Paks/~mods/CabinRejoin_P.ucas
@@ -18,38 +17,58 @@ README.md
 LICENSE
 ```
 
-Nur benötigte Dateien ausliefern. `.utoc`/`.ucas` nur gemeinsam, falls der Build
-sie produziert. Canonical game-root UE4SS-Pfade und reine PAK-Archive funktionieren
-ebenfalls. `LogicMods` wird bei explizitem game-root Pfad beibehalten. Loader
-als eigene Requirement angeben; keinen Runtime-Build erfinden oder ungeprüft
-mit ausliefern. Der aktuell diagnostizierte experimentelle Build ist kein
-allgemeines Kompatibilitätsversprechen.
+This is a layout example, not a list of required payload files. Include only the
+files produced and needed by the actual mod. Ship `.utoc`/`.ucas` as a matching
+pair, with a `.pak` companion when the build produces one. Canonical game-root
+UE4SS paths and pure PAK archives are also supported. Explicit game-root
+`LogicMods` paths are preserved.
 
-`enabled.txt` aktiviert unabhängige Mods, ohne die gemeinsame `mods.txt` zu
-überschreiben. Falls der Mod eine feste Loader-Reihenfolge braucht, reicht der
-Marker nicht: diese Anforderung separat lösen. Vortex verwaltet ausschließlich
-die gelieferten Dateien, keine vom Mod erzeugten Speicherstände/Logs.
+Declare the compatible UE4SS runtime as a separate requirement. Do not bundle
+an unverified runtime. Include `enabled.txt` in each independent Lua/native mod
+folder so it can activate without replacing shared `mods.txt`/`mods.json`.
+Mods needing a particular loader order require a separately validated solution.
 
-Release-only Payload mit folgendem Runner paketieren; dieser ergänzt fehlende
-Marker und prüft die tatsächliche Vortex-Dateizuordnung vor dem ZIP-Bau:
+Vortex manages the supplied files. Saves, logs, and state generated while the
+mod runs require their own documented lifecycle and uninstall behavior.
+
+## Package and verify
+
+From this repository:
 
 ```powershell
 python tools/package-game-mod.py <release-payload-folder> --name CabinRejoin --version 0.1.0
 ```
 
-Der Runner testet Paketstruktur, keine Rejoin-Spiellogik. Keine Diagnoseordner,
-Testserver, `command.lua`, `diagnostic.lua`, `probes.lua` oder `devbridge.lua`
-als Release-Payload verwenden.
+The tool adds missing independent activation markers, checks the actual
+installer's routing, and writes a ZIP and SHA-256 receipt under `dist`.
+It rejects known diagnostic scripts. Review the whole input folder before
+packaging; the filename checks do not establish that every file is a release file.
+Exclude test servers, probes, `command.lua`, `diagnostic.lua`, and `devbridge.lua`.
 
-Die vorhandene Rejoin-Acceptance (einschließlich Host-Fall) bleibt verbindlich.
-Vor dem ersten Nexus-Upload werden gebraucht: akzeptiertes Paket, finaler Name
-und Version, ehrliche Funktionsbeschreibung, Requirements, Lizenz und eigene
-Gameplay-Screenshots. Danach tatsächlichen Nexus-Spiel-Domain zurückmelden;
-die Erweiterung kann dann mit `build-extension.py --nexus-domain <domain>`
-passend gebaut werden. Keine Kommunikation an die andere Session wurde versendet.
+This validates packaging, not gameplay. Verify the mod's advertised behavior,
+supported multiplayer/host cases, persistence, and uninstall behavior in the game.
+Then test the exact ZIP through Vortex installation, deployment, disable,
+re-enable and purge before its first Nexus upload.
 
-Lizenzvorgabe vom Nutzer: wie Valheim ServerPasswordOnce. Den eigenen
-DooDesch-Lizenztext verwenden; keine GPL/MIT-Vorlage übernehmen. Der Lizenztext
-dieser Erweiterung liegt unter `LICENSE.md`; für den Gameplay-Mod Titel,
-offizielle Releasekanäle und Kontakt passend anpassen, dieselben Rechte und
-Einschränkungen erhalten. Der Gameplay-Owner muss dies in seinem Repo umsetzen.
+## First Nexus upload
+
+Provide the accepted package, final name/version, accurate description,
+requirements, license, and original screenshots. Once Nexus approves the game
+section, use its actual domain to rebuild the extension:
+
+```powershell
+python tools/build-extension.py --nexus-domain <approved-domain>
+```
+
+The local ID `thecabingame` is provisional and is not a confirmed Nexus domain.
+
+## Gameplay license
+
+The gameplay mod retains the DooDesch license terms used for Valheim
+ServerPasswordOnce. Adapt that project's license title, release channels, and
+contact details while preserving its permissions and restrictions, subject to
+the gameplay mod's own dependency licenses.
+
+The Vortex extension is separately licensed under GPL-3.0-only. Its `LICENSE.md`
+is not the gameplay license template. Installing a separate gameplay mod through
+Vortex does not by itself apply the extension's license to that mod.

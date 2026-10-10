@@ -1,7 +1,7 @@
 # Credits
 
 Extension code and original cabin illustration: DooDesch, 2026.
-License: DooDesch custom source-available license; see LICENSE.md.
+SPDX-License-Identifier: GPL-3.0-only. See LICENSE.md.
 
 The title “the cabin game” identifies the game developed/published by
 Twisted Corridor. No game code, game assets, UE4SS binaries, or game screenshots

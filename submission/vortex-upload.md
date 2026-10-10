@@ -1,46 +1,48 @@
-# Vortex-Upload: vorbereitete Felder
+# Extension upload fields
 
-| Feld | Kandidat |
+| Field | Value |
 |---|---|
-| Upload-Ziel | https://www.nexusmods.com/site |
-| Kategorie | Vortex > Extensions |
+| Destination | https://www.nexusmods.com/site |
+| Category | Vortex > Extensions |
 | Name | the cabin game - Vortex Support |
-| Autor | DooDesch, wie bei Palvolve |
-| Sprache | English |
-| Zusammenfassung | `vortex-summary.txt` |
-| Beschreibung | `vortex-description.bbcode` |
-| Version | 0.1.0, exakt gleich `extension/info.json` |
-| Bild | `extension/gameart.png`, 640 × 360 PNG, eigene Illustration ohne Text |
-| Main File | Nach Vergabe des Nexus-Domains neu gebautes `TheCabinGame-Vortex-0.1.0.zip` |
-| Dateiname | the cabin game - Vortex Support |
-| Mod-Manager-Datei | Ja, Extension-ZIP; nicht das Gameplay-Mod-ZIP |
-| Lizenz | DooDesch custom source-available license wie ServerPasswordOnce; Code, Dokumentation und eigene Grafik enthalten |
-| Donation Points | Bestehende Nutzerpräferenz übernehmen; hier nichts aktiviert |
+| Author | DooDesch |
+| Language | English |
+| Summary | [vortex-summary.txt](vortex-summary.txt) |
+| Description | [vortex-description.bbcode](vortex-description.bbcode) |
+| Version | 0.1.0; must match `extension/info.json` |
+| Image | `extension/gameart.png`, original 640 × 360 PNG illustration |
+| Main File | Final-domain `TheCabinGame-Vortex-0.1.0.zip` |
+| File display name | the cabin game - Vortex Support |
+| Mod Manager download | Enabled; upload the extension ZIP |
+| License | GPL-3.0-only; extension code, documentation and original artwork |
+| Donation Points | Apply the author's existing preference |
 
-Vor dem öffentlichen Upload den `Preparation status`-Absatz durch die tatsächlich
-nachgewiesene Vortex-Version, getesteten Spielbuild und Testgrenzen ersetzen.
-Keinen erfolgreichen Live-Test oder Review behaupten, solange er fehlt.
+Before upload, replace the description's preparation-status paragraph with the
+actual Vortex version, game build, tested mod/runtime versions, and validation
+limits. Do not claim completed live tests or Nexus review before they occur.
 
-Permissions-Freitext entsprechend ServerPasswordOnce:
+## Permissions
 
-Nexus-Permissions: Upload auf andere Seiten, Verwendung von Code/Assets,
-Modifikation zur Weiterveröffentlichung und Konvertierung grundsätzlich
-**nur mit vorheriger Erlaubnis**. Credit erforderlich. Private Änderungen,
-Beitrags-Forks und die Aufgabe-Ausnahme gemäß LICENSE.md im Freitext erhalten.
-Donation Points bleiben eine eigene Nutzereinstellung.
+Allow redistribution, modification, conversion and code/asset reuse under
+GPL-3.0-only. Do not require separate approval or prohibit commercial
+redistribution. Preserve required copyright/license notices and provide
+corresponding source according to the GPL. Link the source commit/tag matching
+the uploaded package. Donation Points are a separate platform setting.
+
+Suggested permissions text:
 
 ```text
-Source available under the DooDesch custom license in LICENSE.md. You may
-read, fork and modify your own copy, use it privately and contribute changes.
-Public redistribution, mirrors, incorporation into other works and commercial
-use require prior written permission from DooDesch, subject to the license
-abandonment exception. No game assets or UE4SS binaries are included.
+Copyright (c) 2026 DooDesch. The extension code, documentation and original
+illustrative artwork are licensed under GPL-3.0-only; see LICENSE.md.
+You may modify and redistribute them, including commercially, under the GPL
+terms. Preserve the required notices and provide the corresponding source.
+Source: https://github.com/DooDesch-Mods/TheCabinGame-Vortex
+No game assets or UE4SS binaries are included.
 ```
 
-Nach dem Upload die Extension-URL in `review-issue.md` eintragen. Noch keine
-API-/Upload-Automation eingerichtet: Der Erstupload und die realen Nexus-IDs
-fehlen. Die Gameplay-Mod-Pipeline wird in ihrer eigenen Session verwaltet.
+After the initial upload, record the extension URL in the
+[review checklist](review-issue.md), and set the actual extension file-group ID
+for [automated updates](../publishing/README.md). The gameplay mod uses its own
+page, license, file-group ID, and publication workflow.
 
-Offizielle Paket-/Uploadregeln:
-https://github.com/Nexus-Mods/Vortex-Backend/wiki/How-to-package-a-game-extension
-https://github.com/Nexus-Mods/Vortex-Backend/wiki/How-to-upload-an-extension-to-nexus
+Reference: [official extension packaging rules](https://github.com/Nexus-Mods/Vortex-Backend/wiki/How-to-package-a-game-extension).
