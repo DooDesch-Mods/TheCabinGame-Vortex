@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -14,6 +15,11 @@ def main():
         raise ValueError(f'release tag {tag!r} does not match info.json version v{version}')
     domain = os.environ.get('NEXUS_GAME_DOMAIN', '')
     group = os.environ.get('NEXUS_FILE_GROUP_ID', '')
+    mod_id = os.environ.get('NEXUS_MOD_ID', '')
+    publish = os.environ.get('PUBLISH_NEXUS', 'true')
+    if publish not in {'true', 'false'}:
+        raise ValueError(f'PUBLISH_NEXUS must be true or false, got {publish!r}')
+    requested = publish == 'true'
     tested = os.environ.get('NEXUS_LIVE_TESTED', '') == 'true'
     has_key = bool(os.environ.get('NEXUS_API_KEY'))
     if not re.fullmatch(r'[a-z0-9]+', domain):
@@ -23,8 +29,19 @@ def main():
     configured = bool(group)
     if configured and not re.fullmatch(r'\d+', group):
         raise ValueError('NEXUS_FILE_GROUP_ID must be the numeric API Info file-group ID')
-    if configured and not has_key:
+    if mod_id and not re.fullmatch(r'[1-9][0-9]*', mod_id):
+        raise ValueError('NEXUS_MOD_ID must be the numeric API Unique Mod ID')
+    if requested and configured and not has_key:
         raise ValueError('Nexus target configured, but NEXUSMODS_API_KEY is unavailable')
+    ready = requested and configured
+    if not requested:
+        nexus_status = 'deliberate skip: Nexus upload not requested'
+    elif not configured:
+        nexus_status = 'deliberate skip: first extension upload/file-group ID pending'
+    else:
+        nexus_status = 'configured'
+    if ready and not mod_id:
+        print('warn: Nexus changelog tab will be skipped because NEXUS_MOD_ID is absent; file description still includes release notes', file=sys.stderr)
     command = ['python', str(ROOT / 'tools' / 'build-extension.py')]
     command.extend(['--nexus-domain', domain])
     result = subprocess.run(command, capture_output=True, text=True, encoding='utf-8')
@@ -32,15 +49,15 @@ def main():
         raise RuntimeError(f'extension build failed (exit {result.returncode}): {result.stderr}')
     build = json.loads(result.stdout)
     asset = 'dist/' + build['archive']
-    report = {'version': version, 'asset': asset, 'nexusReady': configured,
-              'nexusStatus': 'configured' if configured else 'deliberate skip: first extension upload/file-group ID pending',
+    report = {'version': version, 'asset': asset, 'nexusReady': ready,
+              'nexusStatus': nexus_status, 'modId': mod_id,
               'sha256': build['sha256']}
     evidence = ROOT / 'evidence'
     evidence.mkdir(exist_ok=True)
     (evidence / 'release-preflight.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     if output := os.environ.get('GITHUB_OUTPUT'):
         with open(output, 'a', encoding='utf-8') as stream:
-            stream.write(f'version={version}\nasset={asset}\nnexus_ready={str(configured).lower()}\n')
+            stream.write(f'version={version}\nasset={asset}\nnexus_ready={str(ready).lower()}\nmod_id={mod_id}\n')
     if summary := os.environ.get('GITHUB_STEP_SUMMARY'):
         with open(summary, 'a', encoding='utf-8') as stream:
             stream.write(f'Package: {asset}\n\nNexus: {report["nexusStatus"]}\n')

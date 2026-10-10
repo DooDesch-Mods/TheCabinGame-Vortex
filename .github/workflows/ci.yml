@@ -6,6 +6,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   check:
     runs-on: windows-latest
@@ -42,7 +45,14 @@ jobs:
       - name: Verify gameplay package builder and document links
         run: python tools/verify-tooling.py
       - name: Verify publication guards without an upload
-        run: python tests/test_release.py
+        run: |
+          python tests/test_release.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tests/test_release_notes.py
+      - name: Prepare release notes without an upload
+        run: |
+          $packageVersion = (Get-Content extension/info.json -Raw | ConvertFrom-Json).version
+          python tools/prepare-release-notes.py --version $packageVersion
       - uses: actions/upload-artifact@v7.0.2
         with:
           name: vortex-package

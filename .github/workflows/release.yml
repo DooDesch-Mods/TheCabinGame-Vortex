@@ -8,6 +8,10 @@ on:
         description: Existing release tag, e.g. v0.1.0 (check existing Nexus version before retry)
         type: string
         required: true
+      publish_nexus:
+        description: Upload a new version to Nexus Mods
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -46,19 +50,28 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tests/test_release.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tests/test_release_notes.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Verify and prepare release
         id: release
         env:
           RELEASE_TAG: ${{ steps.target.outputs.tag }}
           NEXUS_GAME_DOMAIN: ${{ vars.NEXUS_GAME_DOMAIN }}
           NEXUS_FILE_GROUP_ID: ${{ vars.NEXUS_FILE_GROUP_ID }}
+          NEXUS_MOD_ID: ${{ vars.NEXUS_MOD_ID }}
           NEXUS_LIVE_TESTED: ${{ vars.NEXUS_LIVE_TESTED }}
           NEXUS_API_KEY: ${{ secrets.NEXUSMODS_API_KEY }}
+          PUBLISH_NEXUS: ${{ github.event_name == 'release' || inputs.publish_nexus }}
         run: |
           New-Item -ItemType Directory -Force evidence | Out-Null
           node --test tests/extension.test.js
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/prepare-release.py
+      - name: Prepare release notes for GitHub and Nexus
+        id: notes
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: python tools/prepare-release-notes.py --version $env:RELEASE_VERSION
       - name: Attach checked ZIP to GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -79,7 +92,9 @@ jobs:
           filename: ${{ steps.release.outputs.asset }}
           version: ${{ steps.release.outputs.version }}
           display_name: the cabin game - Vortex Support ${{ steps.release.outputs.version }}
-          description: See the matching GitHub release for changes and validation.
+          description: ${{ steps.notes.outputs.bbcode }}
+          mod_id: ${{ steps.release.outputs.mod_id }}
+          changelog: ${{ steps.release.outputs.mod_id && steps.notes.outputs.plain || '' }}
           category: main
           primary_mod_manager_download: true
           allow_mod_manager_download: true

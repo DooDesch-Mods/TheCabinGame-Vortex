@@ -13,7 +13,7 @@ TAG = 'v' + json.loads((ROOT / 'extension' / 'info.json').read_text(encoding='ut
 class ReleaseGuards(unittest.TestCase):
     def run_preflight(self, values):
         environment = os.environ.copy()
-        for name in ['RELEASE_TAG', 'NEXUS_GAME_DOMAIN', 'NEXUS_FILE_GROUP_ID', 'NEXUS_LIVE_TESTED', 'NEXUS_API_KEY', 'GITHUB_OUTPUT', 'GITHUB_STEP_SUMMARY']:
+        for name in ['RELEASE_TAG', 'NEXUS_GAME_DOMAIN', 'NEXUS_FILE_GROUP_ID', 'NEXUS_MOD_ID', 'NEXUS_LIVE_TESTED', 'NEXUS_API_KEY', 'PUBLISH_NEXUS', 'GITHUB_OUTPUT', 'GITHUB_STEP_SUMMARY']:
             environment.pop(name, None)
         environment.update(values)
         # Run the real builder in a disposable fixture. A test-domain ZIP must
@@ -74,6 +74,46 @@ class ReleaseGuards(unittest.TestCase):
                                     'NEXUS_FILE_GROUP_ID': '123', 'NEXUS_LIVE_TESTED': 'true'})
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('API_KEY is unavailable', result.stderr)
+
+    def test_manual_run_without_upload_selection_does_not_need_a_key(self):
+        result = self.run_preflight({'RELEASE_TAG': TAG, 'NEXUS_GAME_DOMAIN': 'testonly',
+                                    'NEXUS_FILE_GROUP_ID': '123', 'NEXUS_LIVE_TESTED': 'true',
+                                    'PUBLISH_NEXUS': 'false'})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        report = json.loads(result.stdout)
+        self.assertFalse(report['nexusReady'])
+        self.assertIn('upload not requested', report['nexusStatus'])
+
+    def test_manual_run_cannot_bypass_live_acceptance(self):
+        result = self.run_preflight({'RELEASE_TAG': TAG, 'NEXUS_GAME_DOMAIN': 'testonly',
+                                    'PUBLISH_NEXUS': 'false'})
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('actual Vortex/game acceptance', result.stderr)
+
+    def test_upload_selection_requires_an_explicit_boolean(self):
+        result = self.run_preflight({'RELEASE_TAG': TAG, 'PUBLISH_NEXUS': 'maybe'})
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('PUBLISH_NEXUS must be true or false', result.stderr)
+
+    def test_unique_mod_id_is_preserved_without_numeric_rounding(self):
+        result = self.run_preflight({'RELEASE_TAG': TAG, 'NEXUS_GAME_DOMAIN': 'testonly',
+                                    'NEXUS_FILE_GROUP_ID': '123', 'NEXUS_MOD_ID': '9856949946759',
+                                    'NEXUS_LIVE_TESTED': 'true', 'NEXUS_API_KEY': 'test-fixture-only'})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout)['modId'], '9856949946759')
+
+    def test_invalid_unique_mod_id_fails_before_packaging(self):
+        result = self.run_preflight({'RELEASE_TAG': TAG, 'NEXUS_GAME_DOMAIN': 'testonly',
+                                    'NEXUS_MOD_ID': 'not-a-number', 'NEXUS_LIVE_TESTED': 'true'})
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('API Unique Mod ID', result.stderr)
+
+    def test_missing_mod_id_reports_changelog_skip(self):
+        result = self.run_preflight({'RELEASE_TAG': TAG, 'NEXUS_GAME_DOMAIN': 'testonly',
+                                    'NEXUS_FILE_GROUP_ID': '123', 'NEXUS_LIVE_TESTED': 'true',
+                                    'NEXUS_API_KEY': 'test-fixture-only'})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('warn: Nexus changelog tab will be skipped', result.stderr)
 
 if __name__ == '__main__':
     unittest.main()

@@ -88,6 +88,7 @@ node --test tests/extension.test.js
 python tools/build-extension.py
 python tools/verify-tooling.py
 python tests/test_release.py
+python tests/test_release_notes.py
 ```
 
 The builder writes an extension ZIP and SHA-256 receipt under `dist`. To configure
