@@ -99,12 +99,18 @@ document links and release guards. They do not establish live game compatibility
 See [GitHub publishing](docs/releases.md) for the release workflow.
 Pull requests are welcome in this repository.
 
+To rebuild the thumbnail, run `python tools/prepare-artwork.py`. It downloads
+the official Steam screenshot and checks its source hash before resizing it.
+Use `--source <original.jpg>` to supply the same original file locally.
+
 ## License and credits
 
-Copyright (c) 2026 DooDesch. Extension code, tools, documentation and original
-artwork use [GPL-3.0-only](LICENSE.md). Redistribution and modification are allowed
-under its terms. See [credits](extension/CREDITS.md).
+Copyright (c) 2026 DooDesch. Extension code, tools and documentation use
+[GPL-3.0-only](LICENSE.md). Redistribution and modification are allowed under its
+terms. The official Steam screenshot used for the game thumbnail is credited to
+Twisted Corridor and is excluded from the GPL license. See
+[credits and image source](extension/CREDITS.md).
 
 This is an unofficial extension for the game developed and published by Twisted
-Corridor. No game assets or UE4SS binaries are included. Gameplay mods retain
-their own licenses.
+Corridor. No game code or UE4SS binaries are included. Gameplay mods retain their
+own licenses.

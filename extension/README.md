@@ -50,10 +50,11 @@ establish game discovery, launch, PAK mounting or UE4SS activation in a live gam
 
 ## License and source
 
-Copyright (c) 2026 DooDesch. Code, documentation and original artwork use
-GPL-3.0-only. See LICENSE.md and CREDITS.md. The cabin illustration is not an
-official game screenshot or logo.
+Copyright (c) 2026 DooDesch. Extension code, tools and documentation use
+GPL-3.0-only. See LICENSE.md. The game thumbnail is an official Steam screenshot
+credited to Twisted Corridor. It is excluded from the GPL license; image rights
+remain with the respective rights holders. See [credits and image source](CREDITS.md).
 
-Complete source, build tools and editable artwork:
+Complete extension source and build tools:
 [DooDesch-Mods/TheCabinGame-Vortex](https://github.com/DooDesch-Mods/TheCabinGame-Vortex).
 For a published release, use the source tag or commit linked on its download page.
