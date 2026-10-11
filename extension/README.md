@@ -3,13 +3,14 @@
 > 🛟 **Need help or found a bug?** Get support at [support.doodesch.de/thecabingame-vortex](https://support.doodesch.de/thecabingame-vortex).
 
 Community extension by DooDesch for Steam on Windows, app ID `4406280`.
-This package is a test candidate. Live Vortex/game validation is pending.
+Version 0.1.1 passed Steam discovery, UE4SS installation, Chair Marker gameplay,
+disable, re-enable and purge checks in Vortex 2.8.0. Nexus game mapping is pending.
 
 ## Install
 
 1. Open **Extensions** in Vortex and drop this extension ZIP into the installation area.
 2. Restart Vortex.
-3. Find **the cabin game** under **Games** and select **Manage**.
+3. Find **the cabin game** under **Games** and select **Add game** (**Manage** in older versions).
 4. Install a compatible gameplay mod and select **Deploy**.
 
 For manual discovery, select the folder containing both files:
@@ -45,8 +46,9 @@ Use the gameplay mod's uninstall guide for those files.
 ## Test limitations
 
 Local-ID candidates cannot route the game's Nexus downloads. Final packages need
-the approved Nexus game domain. Installer and isolated filesystem checks do not
-establish game discovery, launch, PAK mounting or UE4SS activation in a live game.
+the approved Nexus game domain. The live test used Steam build 25553694,
+UE4SS v3.0.1-1164-g5e627997 and Chair Marker 0.1.2. Manual discovery,
+launch through Vortex, PAK mounting and Nexus download routing remain untested.
 
 ## License and source
 

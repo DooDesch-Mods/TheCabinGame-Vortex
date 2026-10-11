@@ -8,9 +8,7 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 
-def read_games(include_unapproved, api_key):
-    url = ('https://api.nexusmods.com/v1/games.json?include_unapproved='
-           + str(include_unapproved).lower())
+def read_json(url, api_key):
     request = Request(url, headers={
         'apikey': api_key,
         'Accept': 'application/json',
@@ -19,11 +17,17 @@ def read_games(include_unapproved, api_key):
     })
     try:
         with urlopen(request, timeout=45) as response:
-            games = json.load(response)
+            return json.load(response)
     except HTTPError as error:
         raise RuntimeError(f'GET {url}: HTTP {error.code}') from error
     except URLError as error:
         raise RuntimeError(f'GET {url}: {error.reason}') from error
+
+
+def read_games(include_unapproved, api_key):
+    url = ('https://api.nexusmods.com/v1/games.json?include_unapproved='
+           + str(include_unapproved).lower())
+    games = read_json(url, api_key)
     if not isinstance(games, list):
         raise ValueError(f'GET {url}: expected a game list, got {type(games).__name__}')
     return games
@@ -32,6 +36,7 @@ def read_games(include_unapproved, api_key):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--game-id', type=int, default=10562)
+    parser.add_argument('--mod-file-id', type=int, default=8127426)
     parser.add_argument('--output', type=Path, default=Path('nexus-game.json'))
     args = parser.parse_args()
     if args.game_id <= 0:
@@ -51,6 +56,15 @@ def main():
         'approved_list_count': len(approved),
         'all_list_count': len(all_games),
     }
+    file_record = read_json(f'https://api.nexusmods.com/v3/mod-files/{args.mod_file_id}', api_key)
+    mod = file_record['data']['mod']
+    file_game = mod['game']
+    if str(file_game['id']) != str(args.game_id):
+        raise ValueError(f'mod file {args.mod_file_id}: game ID differs from {args.game_id}')
+    report['file_game'] = {key: file_game.get(key) for key in ('id', 'name', 'domain_name')}
+    report['mod'] = {key: mod.get(key) for key in ('id', 'game_scoped_id', 'name', 'status')}
+    report['mod_file_id'] = args.mod_file_id
+    report['domain_confirmed'] = bool(re.fullmatch(r'[a-z0-9]+', file_game.get('domain_name') or ''))
     if rows:
         game = rows[0]
         domain = game.get('domain_name')
@@ -62,7 +76,7 @@ def main():
     args.output.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     print(json.dumps(report, indent=2))
     if not rows:
-        print(f'warn: game {args.game_id} is absent from the API game list')
+        print(f'warn: game {args.game_id} is absent from the legacy API game list; approval is not confirmed')
 
 
 if __name__ == '__main__':

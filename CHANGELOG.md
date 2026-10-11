@@ -7,6 +7,12 @@
 - Use the original Steam library cover for portrait game tiles in Vortex.
 - Preserve the landscape package thumbnail and credit both official images.
 
+### Validation
+
+- Test Steam discovery, original UE4SS installation and Chair Marker 0.1.2 gameplay in Vortex 2.8.0 on Steam build 25553694.
+- Confirm disable, re-enable and purge behavior with all 23 managed files and 26 recorded original game files.
+- Nexus mapping, manual discovery, launch through Vortex and live PAK mounting remain pending.
+
 ## [0.1.0]
 
 ### Added

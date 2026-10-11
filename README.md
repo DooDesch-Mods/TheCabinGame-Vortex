@@ -7,13 +7,14 @@
 Community game support for the Steam Windows version of **the cabin game**.
 Discover the game and manage PAK, IoStore and UE4SS mod files through Vortex.
 
-**Status:** `0.1.0` is a test candidate. Live Vortex/game validation and Nexus
-publication are pending. No stable extension download is available yet.
+**Status:** `0.1.1` passed Steam discovery, original UE4SS installation,
+Chair Marker gameplay, disable, re-enable and purge checks in Vortex 2.8.0.
+Nexus game mapping and public extension review are pending. Use the test build below.
 
 ## Requirements
 
 - [the cabin game on Steam](https://store.steampowered.com/app/4406280/the_cabin_game/) for Windows, app ID `4406280`.
-- [Vortex for Windows](https://www.nexusmods.com/site/mods/1). The validated Vortex version will be recorded before the first stable release.
+- [Vortex for Windows](https://www.nexusmods.com/site/mods/1), tested with version `2.8.0`.
 - A game-compatible [UE4SS runtime](https://github.com/UE4SS-RE/RE-UE4SS) for Lua/native mods. Use the version required by the gameplay mod.
 
 Install gameplay mods and UE4SS separately. The extension does not download a
@@ -24,12 +25,16 @@ runtime or choose its version for you.
 1. Open a successful [Check and build run](https://github.com/DooDesch-Mods/TheCabinGame-Vortex/actions/workflows/ci.yml) and download **vortex-package**.
 2. Extract the artifact ZIP. The inner extension ZIP is the installable file.
 3. In Vortex, open **Extensions**, drop that ZIP into the installation area, and restart Vortex.
-4. Open **Games**, find **the cabin game**, and select **Manage**.
+4. Open **Games**, find **the cabin game**, and select **Add game** (**Manage** in older versions).
 5. Install a compatible gameplay mod and select **Deploy**.
 
 Builds without the approved Nexus domain use a local game ID. They cannot route
-the game's Nexus downloads. Final-domain packages need live Vortex/game validation
-before a stable release.
+the game's Nexus downloads. A changed final game ID needs a new Vortex test profile.
+
+The live test used Steam build `25553694`, UE4SS `v3.0.1-1164-g5e627997` and
+Chair Marker `0.1.2`. All 23 deployed files matched their archives. Purge removed
+those files and preserved the 26 recorded original game files. Manual discovery,
+launch through Vortex, PAK mounting and Nexus download routing still need live checks.
 
 ## Game detection
 
