@@ -95,8 +95,10 @@ def main():
     repo = os.environ.get('GITHUB_REPOSITORY', 'DooDesch-Mods/TheCabinGame-Vortex')
     if not re.fullmatch(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+', repo):
         raise ValueError(f'invalid repository name: {repo!r}')
-    notes = {'markdown': section, 'plain': render(section, plain=True),
-             'bbcode': render(section) + f'\n\n[url=https://github.com/{repo}/releases/tag/v{args.version}]Full release notes[/url]'}
+    support = '🛟 **Need help or found a bug?** Get support at [support.doodesch.de/thecabingame-vortex](https://support.doodesch.de/thecabingame-vortex).'
+    notes = {'markdown': '> ' + support + '\n\n' + section, 'plain': render(section, plain=True),
+             'bbcode': inline(support, False) + '\n\n' + render(section)
+                       + f'\n\n[url=https://github.com/{repo}/releases/tag/v{args.version}]Full release notes[/url]'}
     evidence = ROOT / 'evidence'
     evidence.mkdir(exist_ok=True)
     for name, suffix in [('markdown', 'md'), ('plain', 'txt'), ('bbcode', 'bbcode')]:
