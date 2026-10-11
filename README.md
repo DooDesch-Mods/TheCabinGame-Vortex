@@ -100,16 +100,18 @@ document links and release guards. They do not establish live game compatibility
 See [GitHub publishing](docs/releases.md) for the release workflow.
 Pull requests are welcome in this repository.
 
-To rebuild the thumbnail, run `python tools/prepare-artwork.py`. It downloads
-the official Steam screenshot and checks its source hash before resizing it.
-Use `--source <original.jpg>` to supply the same original file locally.
+To prepare the images, run `python tools/prepare-artwork.py`. It checks the
+official Steam source hashes, copies the 600x900 library cover without changes,
+and resizes the screenshot for the required 640x360 package thumbnail.
+The game registration uses `cover.jpg` for Vortex's portrait tiles.
+Use `--source <screenshot.jpg> --cover-source <cover.jpg>` to supply both originals locally.
 
 ## License and credits
 
 Copyright (c) 2026 DooDesch. Extension code, tools and documentation use
 [GPL-3.0-only](LICENSE.md). Redistribution and modification are allowed under its
-terms. The official Steam screenshot used for the game thumbnail is credited to
-Twisted Corridor and is excluded from the GPL license. See
+terms. The official Steam library cover and screenshot are credited to
+Twisted Corridor and excluded from the GPL license. See
 [credits and image source](extension/CREDITS.md).
 
 This is an unofficial extension for the game developed and published by Twisted

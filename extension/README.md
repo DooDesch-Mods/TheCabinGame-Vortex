@@ -51,8 +51,9 @@ establish game discovery, launch, PAK mounting or UE4SS activation in a live gam
 ## License and source
 
 Copyright (c) 2026 DooDesch. Extension code, tools and documentation use
-GPL-3.0-only. See LICENSE.md. The game thumbnail is an official Steam screenshot
-credited to Twisted Corridor. It is excluded from the GPL license; image rights
+GPL-3.0-only. See LICENSE.md. The game tile uses the original Steam library cover;
+the package also includes an official Steam screenshot. Both are credited to
+Twisted Corridor and excluded from the GPL license; image rights
 remain with the respective rights holders. See [credits and image source](CREDITS.md).
 
 Complete extension source and build tools:

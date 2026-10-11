@@ -9,7 +9,7 @@ import zipfile
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
-FILES = ['index.js', 'info.json', 'config.json', 'gameart.png', 'README.md', 'CREDITS.md', 'LICENSE.md']
+FILES = ['index.js', 'info.json', 'config.json', 'gameart.png', 'cover.jpg', 'README.md', 'CREDITS.md', 'LICENSE.md']
 
 def main():
     parser = argparse.ArgumentParser()
@@ -28,6 +28,9 @@ def main():
     with Image.open(source / 'gameart.png') as art:
         if art.size != (640, 360) or art.format != 'PNG' or (source / 'gameart.png').stat().st_size > 1_000_000:
             raise ValueError('gameart must be PNG, 640x360, at most 1 MB')
+    with Image.open(source / 'cover.jpg') as cover:
+        if cover.size != (600, 900) or cover.format != 'JPEG' or (source / 'cover.jpg').stat().st_size > 1_000_000:
+            raise ValueError('cover must be JPEG, 600x900, at most 1 MB')
     result = subprocess.run(['node', '--check', str(source / 'index.js')], capture_output=True, text=True)
     if result.returncode:
         raise RuntimeError(f'index.js syntax check failed: {result.stderr}')

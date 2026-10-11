@@ -1,7 +1,7 @@
 {
   "name": "the cabin game",
   "author": "DooDesch",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Steam discovery and PAK, IoStore and UE4SS mod installation for the cabin game.",
   "type": "game"
 }

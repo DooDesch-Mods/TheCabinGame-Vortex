@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1]
+
+### Fixed
+
+- Use the original Steam library cover for portrait game tiles in Vortex.
+- Preserve the landscape package thumbnail and credit both official images.
+
 ## [0.1.0]
 
 ### Added

@@ -140,7 +140,7 @@ function main(context) {
     mergeMods: true,
     queryPath: findGame,
     queryModPath: () => '.',
-    logo: 'gameart.png',
+    logo: 'cover.jpg',
     executable: () => `${PROJECT}.exe`,
     requiredFiles: [`${PROJECT}.exe`, path.join(PROJECT, 'Binaries', 'Win64', `${PROJECT}-Win64-Shipping.exe`)],
     setup: prepareForModding,
