@@ -39,8 +39,8 @@ def main():
     parser.add_argument('--mod-file-id', type=int, default=8127426)
     parser.add_argument('--output', type=Path, default=Path('nexus-game.json'))
     args = parser.parse_args()
-    if args.game_id <= 0:
-        raise ValueError('game-id must be positive')
+    if args.game_id <= 0 or args.mod_file_id <= 0:
+        raise ValueError('game-id and mod-file-id must be positive')
     api_key = os.environ.get('NEXUSMODS_API_KEY')
     if not api_key:
         raise ValueError('NEXUSMODS_API_KEY is missing')
@@ -62,6 +62,10 @@ def main():
         raise ValueError(f'mod file {args.mod_file_id}: returned file ID differs')
     report['mod_file'] = {key: file_data.get(key) for key in
                           ('id', 'name', 'is_active', 'versions_count')}
+    versions = read_json(f'https://api.nexusmods.com/v3/mod-files/{args.mod_file_id}/versions', api_key)
+    report['file_versions'] = [{key: row.get(key) for key in
+                               ('id', 'version', 'category', 'is_primary', 'name')}
+                              for row in versions['data']['versions']]
     report['domain_confirmed'] = False
     if rows:
         game = rows[0]

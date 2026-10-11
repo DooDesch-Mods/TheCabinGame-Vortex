@@ -92,6 +92,25 @@ jobs:
           NEXUS_FILE_GROUP_ID: ${{ vars.NEXUS_FILE_GROUP_ID }}
           RELEASE_VERSION: ${{ steps.release.outputs.version }}
         run: python tools/verify-nexus-release.py --before-upload
+      - name: Prepare Nexus-compatible file notes
+        id: nexus_notes
+        if: steps.release.outputs.nexus_ready == 'true'
+        env:
+          FILE_NOTES: ${{ steps.notes.outputs.bbcode }}
+        run: |
+          $nexusFileNotes = $env:FILE_NOTES
+          $supportIcon = [char]::ConvertFromUtf32(0x1F6DF) + ' '
+          if ($nexusFileNotes.StartsWith($supportIcon)) {
+            $nexusFileNotes = $nexusFileNotes.Substring($supportIcon.Length)
+            Write-Warning 'Nexus legacy file descriptions reject emoji; using the text-only support line'
+          }
+          if ($nexusFileNotes -match '[\uD800-\uDBFF][\uDC00-\uDFFF]') {
+            throw 'Nexus file notes contain unsupported supplementary Unicode characters'
+          }
+          $notesDelimiter = 'NEXUS_NOTES_' + [guid]::NewGuid().ToString('N')
+          "bbcode<<$notesDelimiter" >> $env:GITHUB_OUTPUT
+          $nexusFileNotes >> $env:GITHUB_OUTPUT
+          $notesDelimiter >> $env:GITHUB_OUTPUT
       - name: Upload new file version to Nexus
         if: steps.release.outputs.nexus_ready == 'true'
         # Nexus-Mods/upload-action v1.0.0-beta.10, pinned to a commit.
@@ -103,7 +122,7 @@ jobs:
           filename: ${{ steps.release.outputs.asset }}
           version: ${{ steps.release.outputs.version }}
           display_name: the cabin game - Vortex Support ${{ steps.release.outputs.version }}
-          description: ${{ steps.notes.outputs.bbcode }}
+          description: ${{ steps.nexus_notes.outputs.bbcode }}
           mod_id: ${{ steps.release.outputs.mod_id }}
           changelog: ${{ steps.release.outputs.mod_id && steps.notes.outputs.plain || '' }}
           category: main

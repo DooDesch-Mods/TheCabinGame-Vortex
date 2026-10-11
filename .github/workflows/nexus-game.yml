@@ -1,6 +1,11 @@
 name: Read Nexus game metadata
 on:
   workflow_dispatch:
+    inputs:
+      mod_file_id:
+        description: Public Nexus file ID to inspect without changing it
+        type: string
+        default: '8127426'
 permissions:
   contents: read
 jobs:
@@ -14,7 +19,8 @@ jobs:
       - name: Read approved and pending game records
         env:
           NEXUSMODS_API_KEY: ${{ secrets.NEXUSMODS_API_KEY }}
-        run: python tools/check-nexus-game.py --output nexus-game.json
+          MOD_FILE_ID: ${{ inputs.mod_file_id }}
+        run: python tools/check-nexus-game.py --mod-file-id "$MOD_FILE_ID" --output nexus-game.json
       - uses: actions/upload-artifact@v7.0.2
         with:
           name: nexus-game-metadata
