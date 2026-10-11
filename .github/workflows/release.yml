@@ -16,6 +16,10 @@ on:
         description: Publish the prepared draft after all selected upload checks pass
         type: boolean
         default: false
+      refresh_file_name:
+        description: Refresh the existing Nexus file label without uploading a version
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -145,6 +149,31 @@ jobs:
           NEXUS_FILE_GROUP_ID: ${{ vars.NEXUS_FILE_GROUP_ID }}
           RELEASE_VERSION: ${{ steps.release.outputs.version }}
         run: python tools/verify-nexus-release.py
+      - name: Refresh Nexus file label
+        if: steps.release.outputs.nexus_ready == 'true' || inputs.refresh_file_name
+        env:
+          NEXUSMODS_API_KEY: ${{ secrets.NEXUSMODS_API_KEY }}
+          NEXUS_FILE_GROUP_ID: ${{ vars.NEXUS_FILE_GROUP_ID }}
+        run: |
+          if (-not $env:NEXUSMODS_API_KEY) { throw 'Nexus file label update requires the API key' }
+          if ($env:NEXUS_FILE_GROUP_ID -notmatch '^[1-9][0-9]*$') { throw 'Nexus file label update requires a numeric file ID' }
+          $fileEndpoint = 'https://api.nexusmods.com/v3/mod-files/' + $env:NEXUS_FILE_GROUP_ID
+          $requestHeaders = @{ apikey = $env:NEXUSMODS_API_KEY }
+          $desiredName = 'the cabin game - Vortex Support'
+          $currentFile = (Invoke-RestMethod -Uri $fileEndpoint -Headers $requestHeaders -Method Get).data
+          if ([string]$currentFile.id -ne $env:NEXUS_FILE_GROUP_ID) { throw 'Nexus file label target ID differs' }
+          if ($currentFile.name -ne $desiredName) {
+            Write-Output "info: updating label for Nexus file $($env:NEXUS_FILE_GROUP_ID)"
+            $requestBody = @{ name = $desiredName } | ConvertTo-Json -Compress
+            Invoke-RestMethod -Uri $fileEndpoint -Headers $requestHeaders -Method Put -ContentType 'application/json' -Body $requestBody
+          } else {
+            Write-Output 'info: Nexus file label already matches'
+          }
+          $confirmedFile = (Invoke-RestMethod -Uri $fileEndpoint -Headers $requestHeaders -Method Get).data
+          if ([string]$confirmedFile.id -ne $env:NEXUS_FILE_GROUP_ID -or $confirmedFile.name -ne $desiredName) {
+            throw 'Nexus file label readback does not match'
+          }
+          @{ file_id = [string]$confirmedFile.id; name = $confirmedFile.name; versions_count = $confirmedFile.versions_count; status = 'confirmed' } | ConvertTo-Json | Set-Content evidence/nexus-file-label.json -Encoding utf8
       - name: Publish the prepared GitHub draft
         if: github.event_name == 'workflow_dispatch' && inputs.publish_github
         env:

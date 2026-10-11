@@ -25,6 +25,11 @@ API. The file response has no game mapping. The artifact contains selected publi
 metadata only. It does not upload files or set release variables. A missing legacy
 game record does not establish approval status.
 
+The manual **refresh_file_name** option updates only the existing Nexus file
+label and verifies it through a readback. Leave **publish_nexus** unchecked for
+this operation to avoid adding another file version. New uploads also refresh
+the label to the product name; each version keeps its own versioned display name.
+
 The **Release and update Nexus** workflow runs when a stable GitHub release is
 published, or when an existing release tag is explicitly selected for a retry.
 Stable release publication requests a Nexus upload automatically. A manual run
