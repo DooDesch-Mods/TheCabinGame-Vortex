@@ -1,0 +1,22 @@
+name: Read Nexus game metadata
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v7.0.0
+        with:
+          python-version: '3.13'
+      - name: Read approved and pending game records
+        env:
+          NEXUSMODS_API_KEY: ${{ secrets.NEXUSMODS_API_KEY }}
+        run: python tools/check-nexus-game.py --output nexus-game.json
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: nexus-game-metadata
+          path: nexus-game.json
+          if-no-files-found: error
