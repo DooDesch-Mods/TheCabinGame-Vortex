@@ -20,9 +20,10 @@ it does not certify live Vortex/game behavior.
 ## Stable releases
 
 The manual **Read Nexus game metadata** workflow reads game ID `10562` from the
-legacy game list and the selected UE4SS file's current API metadata. Its artifact
-contains only the selected game's public fields. It does not upload files or set
-release variables. A missing legacy game record does not establish approval status.
+legacy game list and checks the selected UE4SS file's existence through the current
+API. The file response has no game mapping. The artifact contains selected public
+metadata only. It does not upload files or set release variables. A missing legacy
+game record does not establish approval status.
 
 The **Release and update Nexus** workflow runs when a stable GitHub release is
 published, or when an existing release tag is explicitly selected for a retry.

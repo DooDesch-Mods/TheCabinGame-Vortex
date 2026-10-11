@@ -46,25 +46,23 @@ def main():
         raise ValueError('NEXUSMODS_API_KEY is missing')
     approved = read_games(False, api_key)
     all_games = read_games(True, api_key)
-    rows = [game for game in all_games if game.get('id') == args.game_id]
+    rows = [game for game in all_games if str(game.get('id')) == str(args.game_id)]
     if len(rows) > 1:
         raise ValueError(f'game {args.game_id}: duplicate API records')
     report = {
         'game_id': args.game_id,
         'found_in_all_games': bool(rows),
-        'found_in_approved_games': any(game.get('id') == args.game_id for game in approved),
+        'found_in_approved_games': any(str(game.get('id')) == str(args.game_id) for game in approved),
         'approved_list_count': len(approved),
         'all_list_count': len(all_games),
     }
     file_record = read_json(f'https://api.nexusmods.com/v3/mod-files/{args.mod_file_id}', api_key)
-    mod = file_record['data']['mod']
-    file_game = mod['game']
-    if str(file_game['id']) != str(args.game_id):
-        raise ValueError(f'mod file {args.mod_file_id}: game ID differs from {args.game_id}')
-    report['file_game'] = {key: file_game.get(key) for key in ('id', 'name', 'domain_name')}
-    report['mod'] = {key: mod.get(key) for key in ('id', 'game_scoped_id', 'name', 'status')}
-    report['mod_file_id'] = args.mod_file_id
-    report['domain_confirmed'] = bool(re.fullmatch(r'[a-z0-9]+', file_game.get('domain_name') or ''))
+    file_data = file_record['data']
+    if str(file_data['id']) != str(args.mod_file_id):
+        raise ValueError(f'mod file {args.mod_file_id}: returned file ID differs')
+    report['mod_file'] = {key: file_data.get(key) for key in
+                          ('id', 'name', 'is_active', 'versions_count')}
+    report['domain_confirmed'] = False
     if rows:
         game = rows[0]
         domain = game.get('domain_name')
@@ -72,6 +70,7 @@ def main():
             raise ValueError(f'game {args.game_id}: invalid domain_name')
         report['game'] = {key: game.get(key) for key in
                           ('id', 'name', 'domain_name', 'approved_date')}
+        report['domain_confirmed'] = True
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     print(json.dumps(report, indent=2))
