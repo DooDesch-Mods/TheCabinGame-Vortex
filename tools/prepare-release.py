@@ -22,8 +22,8 @@ def main():
     requested = publish == 'true'
     tested = os.environ.get('NEXUS_LIVE_TESTED', '') == 'true'
     has_key = bool(os.environ.get('NEXUS_API_KEY'))
-    if not re.fullmatch(r'[a-z0-9]+', domain):
-        raise ValueError('stable release requires NEXUS_GAME_DOMAIN: the actual approved Nexus domain; use CI for local candidates')
+    if domain and not re.fullmatch(r'[a-z0-9]+', domain):
+        raise ValueError('NEXUS_GAME_DOMAIN must be the actual lowercase Nexus domain')
     if not tested:
         raise ValueError('NEXUS_LIVE_TESTED is not true; actual Vortex/game acceptance is still pending')
     configured = bool(group)
@@ -42,8 +42,11 @@ def main():
         nexus_status = 'configured'
     if ready and not mod_id:
         print('warn: Nexus changelog tab will be skipped because NEXUS_MOD_ID is absent; file description still includes release notes', file=sys.stderr)
-    command = ['python', str(ROOT / 'tools' / 'build-extension.py')]
-    command.extend(['--nexus-domain', domain])
+    command = ['python', str(ROOT / 'tools' / 'build-extension.py'), '--release']
+    if domain:
+        command.extend(['--nexus-domain', domain])
+    else:
+        print('info: Nexus game mapping is pending; releasing the tested local game ID', file=sys.stderr)
     result = subprocess.run(command, capture_output=True, text=True, encoding='utf-8')
     if result.returncode:
         raise RuntimeError(f'extension build failed (exit {result.returncode}): {result.stderr}')
@@ -51,7 +54,8 @@ def main():
     asset = 'dist/' + build['archive']
     report = {'version': version, 'asset': asset, 'nexusReady': ready,
               'nexusStatus': nexus_status, 'modId': mod_id,
-              'sha256': build['sha256']}
+              'sha256': build['sha256'], 'gameMapping': build['gameMapping'],
+              'gameConfig': build['config']}
     evidence = ROOT / 'evidence'
     evidence.mkdir(exist_ok=True)
     (evidence / 'release-preflight.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
@@ -60,7 +64,7 @@ def main():
             stream.write(f'version={version}\nasset={asset}\nnexus_ready={str(ready).lower()}\nmod_id={mod_id}\n')
     if summary := os.environ.get('GITHUB_STEP_SUMMARY'):
         with open(summary, 'a', encoding='utf-8') as stream:
-            stream.write(f'Package: {asset}\n\nNexus: {report["nexusStatus"]}\n')
+            stream.write(f'Package: {asset}\n\nNexus: {report["nexusStatus"]}\n\nGame mapping: {report["gameMapping"]}\n')
     print(json.dumps(report, indent=2))
 
 if __name__ == '__main__':

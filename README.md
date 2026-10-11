@@ -9,7 +9,7 @@ Discover the game and manage PAK, IoStore and UE4SS mod files through Vortex.
 
 **Status:** `0.1.1` passed Steam discovery, original UE4SS installation,
 Chair Marker gameplay, disable, re-enable and purge checks in Vortex 2.8.0.
-Nexus game mapping and public extension review are pending. Use the test build below.
+Nexus game mapping and public extension review are pending. Import gameplay-mod ZIPs through Vortex.
 
 ## Requirements
 
@@ -20,11 +20,11 @@ Nexus game mapping and public extension review are pending. Use the test build b
 Install gameplay mods and UE4SS separately. The extension does not download a
 runtime or choose its version for you.
 
-## Install a test build
+## Install
 
-1. Open a successful [Check and build run](https://github.com/DooDesch-Mods/TheCabinGame-Vortex/actions/workflows/ci.yml) and download **vortex-package**.
-2. Extract the artifact ZIP. The inner extension ZIP is the installable file.
-3. In Vortex, open **Extensions**, drop that ZIP into the installation area, and restart Vortex.
+1. Download the extension ZIP from the [latest release](https://github.com/DooDesch-Mods/TheCabinGame-Vortex/releases/latest).
+2. In Vortex, open **Extensions** and drop that ZIP into the installation area.
+3. Restart Vortex.
 4. Open **Games**, find **the cabin game**, and select **Add game** (**Manage** in older versions).
 5. Install a compatible gameplay mod and select **Deploy**.
 
@@ -99,6 +99,7 @@ python tests/test_release_notes.py
 The builder writes an extension ZIP and SHA-256 receipt under `dist`. To configure
 both packaged game mappings, pass `--nexus-domain <approved-domain>`. Do not guess
 the domain. Changing the local game ID requires a new Vortex test profile.
+Use `--release` for a release filename that preserves the current mappings.
 
 Automated checks cover installer rules, isolated hardlink deployment, packaging,
 document links and release guards. They do not establish live game compatibility.

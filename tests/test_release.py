@@ -36,10 +36,27 @@ class ReleaseGuards(unittest.TestCase):
         self.assertIn('deliberate skip', report['nexusStatus'])
         self.assertNotIn('local-candidate', report['asset'])
 
-    def test_stable_release_without_domain_fails(self):
+    def test_tested_release_without_domain_preserves_local_mapping(self):
         result = self.run_preflight({'RELEASE_TAG': TAG, 'NEXUS_LIVE_TESTED': 'true'})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        report = json.loads(result.stdout)
+        self.assertEqual(report['gameConfig'], {'gameId': 'thecabingame', 'nexusPageId': None})
+        self.assertEqual(report['gameMapping'], 'pending')
+        self.assertNotIn('local-candidate', report['asset'])
+
+    def test_upload_without_domain_keeps_game_downloads_unmapped(self):
+        result = self.run_preflight({'RELEASE_TAG': TAG, 'NEXUS_LIVE_TESTED': 'true',
+                                    'NEXUS_FILE_GROUP_ID': '123', 'NEXUS_API_KEY': 'test-fixture-only'})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        report = json.loads(result.stdout)
+        self.assertTrue(report['nexusReady'])
+        self.assertIsNone(report['gameConfig']['nexusPageId'])
+
+    def test_invalid_domain_still_fails(self):
+        result = self.run_preflight({'RELEASE_TAG': TAG, 'NEXUS_LIVE_TESTED': 'true',
+                                    'NEXUS_GAME_DOMAIN': 'bad-domain'})
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn('actual approved Nexus domain', result.stderr)
+        self.assertIn('actual lowercase Nexus domain', result.stderr)
 
     def test_first_upload_without_live_acceptance_fails(self):
         result = self.run_preflight({'RELEASE_TAG': TAG, 'NEXUS_GAME_DOMAIN': 'testonly'})

@@ -14,6 +14,7 @@ FILES = ['index.js', 'info.json', 'config.json', 'gameart.png', 'cover.jpg', 'RE
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--nexus-domain', help='Actual approved Nexus URL domain, never a guessed slug')
+    parser.add_argument('--release', action='store_true', help='Use a release filename without changing the game mapping')
     args = parser.parse_args()
     if args.nexus_domain and not re.fullmatch(r'[a-z0-9]+', args.nexus_domain):
         parser.error('Nexus domain must be the literal lowercase domain from the approved game URL')
@@ -36,7 +37,7 @@ def main():
         raise RuntimeError(f'index.js syntax check failed: {result.stderr}')
     releases = ROOT / 'dist'
     releases.mkdir(exist_ok=True)
-    suffix = '' if args.nexus_domain else '-local-candidate'
+    suffix = '' if args.nexus_domain or args.release else '-local-candidate'
     target = releases / f'TheCabinGame-Vortex-{info["version"]}{suffix}.zip'
     with zipfile.ZipFile(target, 'w', compression=zipfile.ZIP_DEFLATED) as archive:
         for name in FILES:
@@ -51,7 +52,8 @@ def main():
             raise ValueError('packaged Nexus mapping differs from requested mapping')
     receipt = {'archive': target.name, 'version': info['version'], 'bytes': target.stat().st_size,
                'sha256': hashlib.sha256(target.read_bytes()).hexdigest(), 'config': config,
-               'files': FILES, 'status': 'packaged-candidate', 'vortexUiTest': 'pending', 'inGameTest': 'pending'}
+               'files': FILES, 'status': 'packaged-release' if args.release else 'packaged-candidate',
+               'gameMapping': 'configured' if config['nexusPageId'] else 'pending'}
     target.with_suffix('.json').write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8')
     print(json.dumps(receipt, indent=2))
 

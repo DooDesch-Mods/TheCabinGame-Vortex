@@ -31,9 +31,17 @@ Stable release publication requests a Nexus upload automatically. A manual run
 leaves **publish_nexus** unchecked by default. Select it only when a new Nexus
 file version is intended. An unchecked manual run rebuilds and attaches the
 checked GitHub assets without contacting the Nexus upload API.
-It checks tag/version equality and the tagged source, requires an approved
-game domain and `NEXUS_LIVE_TESTED=true`, and attaches the ZIP and SHA-256 receipt.
-A local-ID or untested candidate is rejected before release assets are built.
+It checks tag/version equality and the tagged source, requires
+`NEXUS_LIVE_TESTED=true`, and attaches the ZIP and SHA-256 receipt. With no game
+domain configured, the release preserves the tested local game ID and leaves
+game-specific Nexus downloads unmapped. An invalid configured domain or an
+untested package is rejected before release assets are built.
+
+For a prepared GitHub draft, select **publish_github** to publish it after the
+selected Nexus upload succeeds. This defaults to false. The workflow uses its
+GitHub token for this operation; GitHub does not start other release-event
+workflows from that token. Existing published releases can still use manual runs
+to attach assets or update Nexus without another GitHub publication.
 
 If the extension file-group ID is still absent, the workflow explicitly skips
 Nexus upload so the first upload can be done manually. Once configured, the
@@ -58,7 +66,7 @@ is skipped; the file description still receives the notes.
 
 | Setting | Purpose |
 |---|---|
-| Variable `NEXUS_GAME_DOMAIN` | Approved game domain used in both packaged mappings |
+| Variable `NEXUS_GAME_DOMAIN` | Optional approved game domain used in both packaged mappings |
 | Variable `NEXUS_FILE_GROUP_ID` | Extension Main File's API Info file-group ID |
 | Variable `NEXUS_MOD_ID` | API Unique Mod ID for the extension page's Changelogs tab |
 | Variable `NEXUS_LIVE_TESTED` | `true` after validation of the intended release |

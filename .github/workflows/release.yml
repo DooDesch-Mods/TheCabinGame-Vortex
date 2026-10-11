@@ -12,6 +12,10 @@ on:
         description: Upload a new version to Nexus Mods
         type: boolean
         default: false
+      publish_github:
+        description: Publish the prepared draft after all selected upload checks pass
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -81,6 +85,13 @@ jobs:
           $assetReceipt = [System.IO.Path]::ChangeExtension($env:ASSET, '.json')
           gh release upload $env:RELEASE_TAG $env:ASSET $assetReceipt --repo $env:GITHUB_REPOSITORY --clobber
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Check existing Nexus versions before upload
+        if: steps.release.outputs.nexus_ready == 'true'
+        env:
+          NEXUSMODS_API_KEY: ${{ secrets.NEXUSMODS_API_KEY }}
+          NEXUS_FILE_GROUP_ID: ${{ vars.NEXUS_FILE_GROUP_ID }}
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: python tools/verify-nexus-release.py --before-upload
       - name: Upload new file version to Nexus
         if: steps.release.outputs.nexus_ready == 'true'
         # Nexus-Mods/upload-action v1.0.0-beta.10, pinned to a commit.
@@ -107,6 +118,22 @@ jobs:
         run: |
           if (-not $env:VERSION_ID) { throw 'Nexus action returned no uploaded version ID' }
           "Nexus acknowledged uploaded version ID: $env:VERSION_ID" >> $env:GITHUB_STEP_SUMMARY
+      - name: Verify uploaded Nexus Main File
+        if: steps.release.outputs.nexus_ready == 'true'
+        env:
+          NEXUSMODS_API_KEY: ${{ secrets.NEXUSMODS_API_KEY }}
+          NEXUS_VERSION_ID: ${{ steps.nexus.outputs.version_id }}
+          NEXUS_FILE_GROUP_ID: ${{ vars.NEXUS_FILE_GROUP_ID }}
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: python tools/verify-nexus-release.py
+      - name: Publish the prepared GitHub draft
+        if: github.event_name == 'workflow_dispatch' && inputs.publish_github
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.target.outputs.tag }}
+        run: |
+          gh release edit $env:RELEASE_TAG --draft=false --latest --notes-file evidence/release-notes.md --repo $env:GITHUB_REPOSITORY
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - uses: actions/upload-artifact@v7.0.2
         if: always()
         with:
