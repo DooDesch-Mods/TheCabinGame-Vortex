@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.2]
+
+### Fixed
+
+- Add the required numerical Nexus game ID `10562` to `info.json` for automatic extension listing.
+- Match the extension metadata name to the Nexus game name, The Cabin Game.
+- Reject packages without a valid numerical Nexus game ID.
+
+### Notes
+
+- Installer behavior and game download routing are unchanged. Game-specific Nexus downloads remain untested and unconnected.
+
 ## [0.1.1]
 
 ### Fixed

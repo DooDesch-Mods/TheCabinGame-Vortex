@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 TAG = 'v' + json.loads((ROOT / 'extension' / 'info.json').read_text(encoding='utf-8'))['version']
 
 class ReleaseGuards(unittest.TestCase):
-    def run_preflight(self, values):
+    def run_preflight(self, values, info_patch=None):
         environment = os.environ.copy()
         for name in ['RELEASE_TAG', 'NEXUS_GAME_DOMAIN', 'NEXUS_FILE_GROUP_ID', 'NEXUS_MOD_ID', 'NEXUS_LIVE_TESTED', 'NEXUS_API_KEY', 'PUBLISH_NEXUS', 'GITHUB_OUTPUT', 'GITHUB_STEP_SUMMARY']:
             environment.pop(name, None)
@@ -21,11 +21,26 @@ class ReleaseGuards(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix='cabin-release-guard-') as directory:
             fixture = Path(directory)
             shutil.copytree(ROOT / 'extension', fixture / 'extension')
+            if info_patch is not None:
+                info_path = fixture / 'extension/info.json'
+                info = json.loads(info_path.read_text(encoding='utf-8'))
+                info.update(info_patch)
+                if info.get('gameId') is None:
+                    info.pop('gameId', None)
+                info_path.write_text(json.dumps(info), encoding='utf-8')
             (fixture / 'tools').mkdir()
             for name in ['prepare-release.py', 'build-extension.py']:
                 shutil.copy2(ROOT / 'tools' / name, fixture / 'tools' / name)
             return subprocess.run(['python', str(fixture / 'tools' / 'prepare-release.py')],
                                   env=environment, capture_output=True, text=True, encoding='utf-8')
+
+    def test_missing_or_invalid_nexus_game_id_fails_before_packaging(self):
+        for game_id in [None, '10562', True, 0, -1]:
+            with self.subTest(game_id=game_id):
+                result = self.run_preflight({'RELEASE_TAG': TAG, 'NEXUS_LIVE_TESTED': 'true'},
+                                            {'gameId': game_id})
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn('positive numerical Nexus Mods game ID', result.stderr)
 
     def test_first_upload_is_an_explicit_skip_with_a_final_domain_package(self):
         result = self.run_preflight({'RELEASE_TAG': TAG, 'NEXUS_GAME_DOMAIN': 'testonly',

@@ -7,9 +7,11 @@
 Community game support for the Steam Windows version of **the cabin game**.
 Discover the game and manage PAK, IoStore and UE4SS mod files through Vortex.
 
-**Status:** `0.1.1` passed Steam discovery, original UE4SS installation,
+**Status:** `0.1.2` adds the numerical Nexus game ID required for automatic
+extension listing. Installer behavior is unchanged from `0.1.1`, which passed
+Steam discovery, original UE4SS installation,
 Chair Marker gameplay, disable, re-enable and purge checks in Vortex 2.8.0.
-Nexus game mapping and public extension review are pending. Import gameplay-mod ZIPs through Vortex.
+Nexus has approved the game as `thecabingame` (ID `10562`). Import gameplay-mod ZIPs through Vortex.
 
 ## Requirements
 
@@ -28,8 +30,12 @@ runtime or choose its version for you.
 4. Open **Games**, find **the cabin game**, and select **Add game** (**Manage** in older versions).
 5. Install a compatible gameplay mod and select **Deploy**.
 
-Builds without the approved Nexus domain use a local game ID. They cannot route
-the game's Nexus downloads. A changed final game ID needs a new Vortex test profile.
+The extension's `info.json` includes the numerical Nexus game ID `10562` for
+automatic listing. Correctly categorized Nexus uploads with one Main File are
+picked up by Vortex within two hours; a prior GitHub review is no longer required.
+See the [official packaging guide](https://github.com/Nexus-Mods/Vortex/wiki/How-to-package-a-game-extension).
+Game-specific Nexus downloads remain unconnected because `config.json` still
+uses `nexusPageId: null`.
 
 The live test used Steam build `25553694`, UE4SS `v3.0.1-1164-g5e627997` and
 Chair Marker `0.1.2`. All 23 deployed files matched their archives. Purge removed

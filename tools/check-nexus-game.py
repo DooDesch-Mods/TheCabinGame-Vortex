@@ -13,7 +13,7 @@ def read_json(url, api_key):
         'apikey': api_key,
         'Accept': 'application/json',
         'Application-Name': 'TheCabinGame-Vortex',
-        'Application-Version': '0.1.1',
+        'Application-Version': '0.1.2',
     })
     try:
         with urlopen(request, timeout=45) as response:
@@ -37,6 +37,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--game-id', type=int, default=10562)
     parser.add_argument('--mod-file-id', type=int, default=8127426)
+    parser.add_argument('--check-extension', action='store_true',
+                        help='Also read the existing extension page category and Main Files')
     parser.add_argument('--output', type=Path, default=Path('nexus-game.json'))
     args = parser.parse_args()
     if args.game_id <= 0 or args.mod_file_id <= 0:
@@ -75,6 +77,18 @@ def main():
         report['game'] = {key: game.get(key) for key in
                           ('id', 'name', 'domain_name', 'approved_date')}
         report['domain_confirmed'] = True
+    if args.check_extension:
+        page = read_json('https://api.nexusmods.com/v1/games/site/mods/2439.json', api_key)
+        site = read_json('https://api.nexusmods.com/v1/games/site.json', api_key)
+        categories = [row for row in site['categories'] if row['category_id'] == page['category_id']]
+        files = read_json('https://api.nexusmods.com/v1/games/site/mods/2439/files.json', api_key)
+        report['extension'] = {
+            'url': 'https://www.nexusmods.com/site/mods/2439',
+            'page': {key: page.get(key) for key in ('mod_id', 'name', 'version', 'status', 'category_id')},
+            'categories': categories,
+            'main_files': [{key: row.get(key) for key in ('file_id', 'name', 'version', 'is_primary', 'category_id')}
+                           for row in files['files'] if row.get('category_id') == 1],
+        }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     print(json.dumps(report, indent=2))

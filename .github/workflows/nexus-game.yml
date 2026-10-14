@@ -6,6 +6,10 @@ on:
         description: Public Nexus file ID to inspect without changing it
         type: string
         default: '8127426'
+      check_extension:
+        description: Read extension page category and current Main Files
+        type: boolean
+        default: false
 permissions:
   contents: read
 jobs:
@@ -20,7 +24,11 @@ jobs:
         env:
           NEXUSMODS_API_KEY: ${{ secrets.NEXUSMODS_API_KEY }}
           MOD_FILE_ID: ${{ inputs.mod_file_id }}
-        run: python tools/check-nexus-game.py --mod-file-id "$MOD_FILE_ID" --output nexus-game.json
+          CHECK_EXTENSION: ${{ inputs.check_extension }}
+        run: |
+          args=()
+          if [ "$CHECK_EXTENSION" = "true" ]; then args+=(--check-extension); fi
+          python tools/check-nexus-game.py --mod-file-id "$MOD_FILE_ID" --output nexus-game.json "${args[@]}"
       - uses: actions/upload-artifact@v7.0.2
         with:
           name: nexus-game-metadata

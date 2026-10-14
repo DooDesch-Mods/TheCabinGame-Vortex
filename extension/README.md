@@ -3,8 +3,10 @@
 > 🛟 **Need help or found a bug?** Get support at [support.doodesch.de/thecabingame-vortex](https://support.doodesch.de/thecabingame-vortex).
 
 Community extension by DooDesch for Steam on Windows, app ID `4406280`.
-Version 0.1.1 passed Steam discovery, UE4SS installation, Chair Marker gameplay,
-disable, re-enable and purge checks in Vortex 2.8.0. Nexus game mapping is pending.
+Version 0.1.2 adds the numerical Nexus game ID required for automatic extension
+listing. Installer behavior is unchanged from 0.1.1, which passed Steam discovery,
+UE4SS installation, Chair Marker gameplay, disable, re-enable and purge checks
+in Vortex 2.8.0. Nexus has approved the game as thecabingame (ID 10562).
 
 ## Install
 
@@ -45,8 +47,9 @@ Use the gameplay mod's uninstall guide for those files.
 
 ## Test limitations
 
-Local-ID candidates cannot route the game's Nexus downloads. Final packages need
-the approved Nexus game domain. The live test used Steam build 25553694,
+Game-specific Nexus download routing remains unconnected (`nexusPageId: null`).
+The numerical game ID in info.json identifies the game for extension listing.
+The live test used Steam build 25553694,
 UE4SS v3.0.1-1164-g5e627997 and Chair Marker 0.1.2. Manual discovery,
 launch through Vortex, PAK mounting and Nexus download routing remain untested.
 

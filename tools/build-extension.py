@@ -20,6 +20,8 @@ def main():
         parser.error('Nexus domain must be the literal lowercase domain from the approved game URL')
     source = ROOT / 'extension'
     info = json.loads((source / 'info.json').read_text(encoding='utf-8'))
+    if type(info.get('gameId')) is not int or info['gameId'] <= 0:
+        raise ValueError('info.json gameId must be the positive numerical Nexus Mods game ID')
     config = json.loads((source / 'config.json').read_text(encoding='utf-8'))
     if args.nexus_domain:
         config.update(gameId=args.nexus_domain, nexusPageId=args.nexus_domain)
@@ -50,8 +52,11 @@ def main():
             raise ValueError('extension archive content/integrity verification failed')
         if json.loads(archive.read('config.json')) != config:
             raise ValueError('packaged Nexus mapping differs from requested mapping')
+        if json.loads(archive.read('info.json')) != info:
+            raise ValueError('packaged extension metadata differs from source')
     receipt = {'archive': target.name, 'version': info['version'], 'bytes': target.stat().st_size,
                'sha256': hashlib.sha256(target.read_bytes()).hexdigest(), 'config': config,
+               'nexusGameId': info['gameId'],
                'files': FILES, 'status': 'packaged-release' if args.release else 'packaged-candidate',
                'gameMapping': 'configured' if config['nexusPageId'] else 'pending'}
     target.with_suffix('.json').write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8')

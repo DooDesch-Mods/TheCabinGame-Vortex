@@ -25,6 +25,9 @@ API. The file response has no game mapping. The artifact contains selected publi
 metadata only. It does not upload files or set release variables. A missing legacy
 game record does not establish approval status.
 
+Select **check_extension** to also read the existing extension page's category,
+published version and current Main Files before or after a release.
+
 The manual **refresh_file_name** option updates only the existing Nexus file
 label and verifies it through a readback. Leave **publish_nexus** unchecked for
 this operation to avoid adding another file version. New uploads also refresh
@@ -89,5 +92,11 @@ requires its returned version ID and records that acknowledgement in the job
 summary. After a failed or timed-out upload, inspect Nexus before retrying:
 an observation timeout does not prove no upload occurred.
 
-Initial Nexus pages, live checks and maintainer review must be completed before
-the extension can appear in Vortex's public listing.
+The [current packaging guide](https://github.com/Nexus-Mods/Vortex/wiki/How-to-package-a-game-extension)
+requires the numerical Nexus game ID in `info.json` (`10562` for The Cabin Game).
+This differs from the runtime domain string in `config.json`. The builder rejects
+a missing or invalid numerical ID. Keep `info.json` and the uploaded Nexus version equal.
+
+Publish under Modding Tools > Vortex Extensions with exactly one Main File.
+Vortex picks up eligible uploads within two hours. A prior GitHub review is no
+longer required; Nexus reviews extensions periodically after publication.
