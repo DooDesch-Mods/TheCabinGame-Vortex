@@ -2,6 +2,8 @@
 
 > 🛟 **Need help or found a bug?** Get support at [support.doodesch.de/thecabingame-vortex](https://support.doodesch.de/thecabingame-vortex).
 
+[![Discord](https://mods.doodesch.de/img/badge.svg)](https://mods.doodesch.de)
+
 [![Check and build](https://github.com/DooDesch-Mods/TheCabinGame-Vortex/actions/workflows/ci.yml/badge.svg)](https://github.com/DooDesch-Mods/TheCabinGame-Vortex/actions/workflows/ci.yml)
 
 Community game support for the Steam Windows version of **the cabin game**.
@@ -117,6 +119,12 @@ official Steam source hashes, copies the 600x900 library cover without changes,
 and resizes the screenshot for the required 640x360 package thumbnail.
 The game registration uses `cover.jpg` for Vortex's portrait tiles.
 Use `--source <screenshot.jpg> --cover-source <cover.jpg>` to supply both originals locally.
+
+## Community
+
+[![DooDesch Mods on Discord](https://mods.doodesch.de/img/card.svg)](https://mods.doodesch.de)
+
+Join the DooDesch Mods Discord: update pings, polls on what comes next, and playtests of new mods.
 
 ## License and credits
 
